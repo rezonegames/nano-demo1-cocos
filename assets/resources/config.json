@@ -1,0 +1,21 @@
+{
+    "config": {
+        "version": "1.0.5",
+        "package": "com.oops.game",
+        "localDataKey": "oops",
+        "localDataIv": "framework",
+        "httpServer": "http://192.168.8.25:8000",
+        "httpTimeout": 10000,
+        "frameRate": 60
+    },
+    "language": {
+        "type": [
+            "zh",
+            "en"
+        ],
+        "path": {
+            "json": "language/json",
+            "texture": "language/texture"
+        }
+    }
+}
