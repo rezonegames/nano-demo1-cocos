@@ -29,11 +29,11 @@ class NetGameTips implements INetworkTips {
     /** 连接提示 */
     connectTips(isShow: boolean): void {
         if (isShow) {
-            Logger.logNet("游戏服务器正在连接");
             oops.gui.open(UIID.Netinstable);
+            Logger.logNet("游戏服务器正在连接");
         } else {
-            Logger.logNet("游戏服务器连接成功");
             oops.gui.remove(UIID.Netinstable);
+            Logger.logNet("游戏服务器连接成功");
         }
     }
 
@@ -134,7 +134,6 @@ class NetNodeGame extends NetNode {
             }
             return false;
         }
-        this._heartTime = 1000;
     }
 
     onHandAck() {
@@ -154,19 +153,18 @@ class NetNodeGame extends NetNode {
                     let resp = LoginToGameResp.decode(new Uint8Array(data.body));
                     oops.log.logNet(resp, "登录游戏账号");
                     if (resp.code == ErrorCode.None) {
+                        // oops.gui.clear();
+                        oops.gui.remove(UIID.Login);
                         // 重连，不去切换ui
                         if (this.isReconnecting) {
                             this.isReconnecting = false;
-                        }
-                        if(resp.tableId != "") {
-                            oops.gui.open(UIID.Game);
-                            return
-                        }
-                        if (resp.roomId != "") {
-                            oops.gui.open(UIID.Waiting);
+                            oops.gui.remove(UIID.Netinstable);
                             return;
                         }
-                        oops.gui.remove(UIID.Login);
+                        // 如果tableId不为空，resuretable协议，进入游戏
+                        if(resp.tableId != "") {
+                            // return
+                        }
                         oops.gui.open(UIID.Hall, resp.roomList);
                         oops.message.dispatchEvent(GameEvent.GameHeaderEvent, {name:resp.player?.name, coin: resp.player?.coin});
                     } else {
@@ -193,7 +191,7 @@ class NetNodeGame extends NetNode {
             case Package.TYPE_HANDSHAKE:
                 var buf = Package.encode(Package.TYPE_HANDSHAKE_ACK, null);
                 this.send(buf, true);
-                setTimeout(() => {
+                setTimeout(()=>{
                     this.onHandAck();
                 }, 1000);
                 break;
@@ -206,6 +204,7 @@ class NetNodeGame extends NetNode {
                 let msg1 = Message.decode(p.body);
                 // oops.log.logNet("", "心跳");
                 super.onMessage(msg1);
+                this.send(this._protocolHelper!.getHearbeat());
                 break;
         }
     }
@@ -280,7 +279,7 @@ export class NetChannelManager {
     public gameConnect(url: string) {
         oops.tcp.connect({
             url: `ws://${url}/nano`,
-            autoReconnect: -1        // 手动重连接
+            autoReconnect: -1        // 自动连接
         }, NetChannelType.Game);
     }
 

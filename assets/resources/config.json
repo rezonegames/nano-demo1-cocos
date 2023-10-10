@@ -4,7 +4,7 @@
         "package": "com.oops.game",
         "localDataKey": "oops",
         "localDataIv": "framework",
-        "httpServer": "http://192.168.8.25:8000",
+        "httpServer": "http://127.0.0.1:8000",
         "httpTimeout": 10000,
         "frameRate": 60
     },

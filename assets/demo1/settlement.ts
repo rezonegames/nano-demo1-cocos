@@ -47,6 +47,7 @@ export class settlement extends Component {
             }
         });
         this.listView.reload();
+        this.labInfo.string = `结算-房间信息：名字：1v1 房间ID：1`
     }
 
     update(deltaTime: number) {
@@ -57,7 +58,7 @@ export class settlement extends Component {
         oops.log.logView("", "关闭结算界面");
         oops.gui.open(UIID.Hall, this.resp.roomList);
         oops.gui.remove(UIID.Game);
-        oops.gui.removeByNode(this.node);
+        oops.gui.removeByNode(this.node, true);
     }
 }
 
