@@ -99,7 +99,7 @@ export class waiting extends Component {
                     needRefreshList = true;
                     break
             }
-            if(this.profiles.length <= 0) {
+            if (this.profiles.length <= 0) {
                 let profiles: Profile[] = [];
                 for (const [k, v] of Object.entries(resp.profiles)) {
                     profiles.push(v);

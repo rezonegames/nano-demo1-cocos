@@ -5,7 +5,8 @@
   "dependencies": {
     "crypto-es": "^1.2.7",
     "protobufjs": "^7.2.5",
-    "long": "^5.2.3"
+    "long": "^5.2.3",
+    "clipboard": "^2.0.11"
   },
   "description": "oops-framework",
   "devDependencies": {

@@ -57,12 +57,12 @@ export class LoadingViewComp extends CCVMParentComp {
     }
 
     private addEvent() {
-        this.on(GameEvent.LoginSuccess, this.onHandler, this);
+        this.on("GameEvent.LoginSuccess", this.onHandler, this);
     }
 
     private onHandler(event: string, args: any) {
         switch (event) {
-            case GameEvent.LoginSuccess:
+            case "GameEvent.LoginSuccess":
                 // 加载流程结束，移除加载提示界面
                 this.ent.remove(LoadingViewComp);
                 break;

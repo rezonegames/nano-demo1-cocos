@@ -9,6 +9,7 @@ const {ccclass, property} = _decorator;
 @ccclass('Main')
 export class Main extends Root {
 
+    // todo：游戏开始前，把所有的资源全部加载进来
     onLoad() {
         super.onLoad();
         gamechannel.gameCreate();

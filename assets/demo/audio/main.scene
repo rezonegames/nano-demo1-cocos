@@ -287,7 +287,7 @@
     "_priority": 1073741824,
     "_fov": 45,
     "_fovAxis": 0,
-    "_orthoHeight": 501.1080332409972,
+    "_orthoHeight": 499.4459833795014,
     "_near": 1,
     "_far": 2000,
     "_color": {
@@ -379,7 +379,7 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 119.96674682955332,
+      "width": 120,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -412,7 +412,7 @@
     "_string": "音乐播放进度",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 24.066666666666666,
+    "_actualFontSize": 20,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -1104,7 +1104,7 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 119.96674682955332,
+      "width": 120,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -1137,7 +1137,7 @@
     "_string": "音乐播放音量",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 24.066666666666666,
+    "_actualFontSize": 20,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -1268,7 +1268,7 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 79.97783121970221,
+      "width": 80,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -1301,7 +1301,7 @@
     "_string": "播放音乐",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 24.066666666666666,
+    "_actualFontSize": 20,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -1571,7 +1571,7 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 79.97783121970221,
+      "width": 80,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -1604,7 +1604,7 @@
     "_string": "播放音效",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 24.066666666666666,
+    "_actualFontSize": 20,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -1874,7 +1874,7 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 79.97783121970221,
+      "width": 80,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -1907,7 +1907,7 @@
     "_string": "配置存盘",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 24.066666666666666,
+    "_actualFontSize": 20,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -2177,7 +2177,7 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 79.97783121970221,
+      "width": 80,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -2210,7 +2210,7 @@
     "_string": "配置载入",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 24.066666666666666,
+    "_actualFontSize": 20,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
