@@ -31,15 +31,25 @@ export class Player {
     DROP_FAST = 0.05
 
     //
+    // id
+    id: number
+
+    //
     // 事件
     events = new EventTarget;
 
-    constructor(arena: Arena) {
+    //
+    // 是否结束
+    end: boolean
+
+    constructor(arena: Arena, id: number) {
         this.pos = {x:0, y:0};
         this.score = 0;
         this.dropCounter = 0;
         this.dropInterval = this.DROP_SLOW;
         this.arena = arena;
+        this.id = id;
+        this.end = false;
     }
 
     createPiece(type)
@@ -114,7 +124,6 @@ export class Player {
                 this.pos.y--;
                 this.arena.merge(this);
                 this.events.emit('pos', this.pos);
-
                 this.reset();
                 this.score += this.arena.sweep();
                 this.events.emit('score', this.score);
@@ -142,9 +151,10 @@ export class Player {
         this.pos.x = (this.arena.matrix[0].length / 2 | 0) -
             (this.matrix[0].length / 2 | 0);
         if (this.arena.collide(this)) {
-            this.arena.clear();
-            this.score = 0;
-            this.events.emit('score', this.score);
+            // this.arena.clear();
+            // this.score = 0;
+            this.end = true;
+            this.events.emit('end', null);
         }
 
         this.events.emit('pos', this.pos);
@@ -191,6 +201,9 @@ export class Player {
 
     update(deltaTime)
     {
+        if(this.end) {
+            return;
+        }
         this.dropCounter += deltaTime;
         if (this.dropCounter > this.dropInterval) {
             this.drop();

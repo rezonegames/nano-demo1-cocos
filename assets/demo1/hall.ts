@@ -2,7 +2,7 @@ import {_decorator, Component, Label, Node} from 'cc';
 import {oops} from "db://oops-framework/core/Oops";
 import {gamechannel} from "db://assets/demo1/gamechannel";
 import {CallbackObject} from "db://oops-framework/libs/network/NetInterface";
-import {GameStateResp, Join, LoginToGameResp, Room} from "db://assets/demo1/proto/client";
+import {GameStateResp, Join, Room} from "db://assets/demo1/proto/client";
 import {ListView} from "db://assets/demo1/listview";
 import {GameEvent} from "db://assets/script/game/common/config/GameEvent";
 import {ErrorCode} from "db://assets/demo1/proto/error";
@@ -42,6 +42,7 @@ export class hall extends Component {
             reuse: (itemNode: Node, item: Room) => {
                 itemNode.getChildByName("labName").getComponent(Label).string = `房间：${item.name}`;
                 itemNode.getChildByName("btnQuickStart").on("click", () => {
+                    //
                     // r.quickstart
                     let buf = Join.encode({roomId: item.roomId}).finish()
                     let rspObject: CallbackObject = {

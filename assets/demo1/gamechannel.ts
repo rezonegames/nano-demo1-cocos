@@ -1,6 +1,5 @@
 import {WebSock} from "db://oops-framework/libs/network/WebSock";
 import {oops} from "db://oops-framework/core/Oops";
-import {Logger} from "db://oops-framework/core/common/log/Logger";
 import {Message} from "db://assets/demo1/nano/message";
 import {
     CallbackObject,
@@ -16,9 +15,8 @@ import Protocol from "db://assets/demo1/nano/protocol";
 import {IPackage, Package} from "db://assets/demo1/nano/package";
 import {UIID} from "db://assets/script/game/common/config/GameUIConfig";
 import {GameStateResp, LoginToGame, LoginToGameResp} from "db://assets/demo1/proto/client";
-import {GameState, GameSubState} from "db://assets/demo1/proto/consts";
+import {GameState, TableState} from "db://assets/demo1/proto/consts";
 import {ErrorCode} from "db://assets/demo1/proto/error";
-import {UICallbacks} from "db://oops-framework/core/gui/layer/Defines";
 
 enum NetChannelType {
     /** 游戏服务器 */
@@ -30,10 +28,10 @@ class NetGameTips implements INetworkTips {
     connectTips(isShow: boolean): void {
         if (isShow) {
             oops.gui.open(UIID.Netinstable);
-            Logger.logNet("游戏服务器正在连接");
+            // Logger.logNet("游戏服务器正在连接");
         } else {
             oops.gui.remove(UIID.Netinstable);
-            Logger.logNet("游戏服务器连接成功");
+            // Logger.logNet("游戏服务器连接成功");
         }
     }
 
@@ -110,6 +108,7 @@ class NetNodeGame extends NetNode {
 
     constructor() {
         super();
+        //
         // 连接之后，需要发handshake
         this._connectedCallback = () => {
             let msg = {
@@ -126,6 +125,7 @@ class NetNodeGame extends NetNode {
         }
         this._reconnetTimeOut = 8000;
 
+        //
         // 连接关闭回调
         this._disconnectCallback = (): boolean => {
             if (this.isAutoReconnect()) {
@@ -137,8 +137,11 @@ class NetNodeGame extends NetNode {
     }
 
     onHandAck() {
+        //
+        // websocket 连接成功了
         this.onChecked();
         oops.log.logNet(this.isReconnecting, "handshake结束");
+        //
         // 第一次连接
         let uid = oops.storage.getUser();
         oops.log.logView(uid, "账号");
@@ -161,12 +164,13 @@ class NetNodeGame extends NetNode {
                             oops.gui.remove(UIID.Netinstable);
                             return;
                         }
+                        //
                         // 如果tableId不为空，resuretable协议，进入游戏
                         if(resp.tableId != "") {
-                            // return
+                            return;
                         }
                         oops.gui.open(UIID.Hall, resp.roomList);
-                        oops.message.dispatchEvent(GameEvent.GameHeaderEvent, {name:resp.player?.name, coin: resp.player?.coin});
+                        oops.message.dispatchEvent(GameEvent.GameHeaderEvent, resp.player);
                     } else {
                         oops.log.logNet("登录失败");
                     }
@@ -230,7 +234,11 @@ export class NetChannelManager {
         this.game.request1(route, buf, rspObject, showTips, force);
     }
 
-    private gameAddNotify(route: string, callback: NetCallFunc, target?: any) {
+    public gameNotify(route: string, buf: NetData) {
+        this.game.request1(route, buf, null, false, false)
+    }
+
+    private gameAddListener(route: string, callback: NetCallFunc, target?: any) {
         let cmd = route2cmd(route);
         this.game.setResponeHandler(cmd, callback, target);
     }
@@ -244,32 +252,24 @@ export class NetChannelManager {
 
         // 通知
         // 切换界面
-        this.gameAddNotify("onState", (cmd, data: any) => {
+        this.gameAddListener("onState", (cmd, data: any) => {
             let resp = GameStateResp.decode(new Uint8Array(data.body));
             oops.log.logNet(resp, "onState");
             switch (resp.state) {
-                case GameState.IDLE:
-                    oops.gui.remove(UIID.Waiting);
-                    break;
-                case GameState.WAIT:
-                case GameState.WAITREADY:
-                    oops.message.dispatchEvent(GameEvent.GameWaitReadyEvent, resp);
-                    break;
-                case GameState.COUNTDOWN:
-                    if(resp.subState == GameSubState.COUNTDOWN_BEGIN) {
-                        oops.log.logView("", "打开游戏界面");
-                        oops.gui.remove(UIID.Waiting);
-                        oops.gui.remove(UIID.Hall);
-                        oops.gui.open(UIID.Game);
+                case GameState.INGAME:
+                    let tableInfo = resp.tableInfo;
+                    switch (tableInfo.tableState) {
+                        case TableState.COUNTDOWN:
+                            oops.gui.remove(UIID.Waiting);
+                            oops.gui.remove(UIID.Hall);
+                            oops.gui.open(UIID.Game);
+                            break
                     }
-                    oops.message.dispatchEvent(GameEvent.GameCountDownEvent, resp);
+                    oops.message.dispatchEvent(GameEvent.TableEvent, resp);
                     break
-                case GameState.GAMING:
-                    break;
-                case GameState.SETTLEMENT:
-                    if(resp.subState == GameSubState.SETTLEMENT_BEGIN){
-                        oops.gui.open(UIID.Settlement, resp);
-                    }
+
+                case GameState.WAIT:
+                    oops.message.dispatchEvent(GameEvent.TableEvent, resp);
                     break;
             }
         }, this);

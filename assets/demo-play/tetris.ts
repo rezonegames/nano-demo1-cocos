@@ -1,7 +1,17 @@
-import {_decorator, Component, Node, Prefab, SpriteFrame, instantiate, Sprite, UITransform, Label, Graphics, Color} from 'cc';
+import {
+    _decorator, Component, Node, Prefab, SpriteFrame, instantiate, Sprite,
+    UITransform, Label, Layout
+} from 'cc';
 import {Arena} from "db://assets/demo-play/arena";
 import {Player} from "db://assets/demo-play/player";
 import {oops} from "db://oops-framework/core/Oops";
+import {
+    TableInfo_Player,
+    TableInfo_PlayersEntry,
+    UpdateState,
+    Player as ProtoPlayer
+} from "db://assets/demo1/proto/client";
+import {gamechannel} from "db://assets/demo1/gamechannel";
 
 const {ccclass, property} = _decorator;
 
@@ -19,9 +29,19 @@ export class tetris extends Component {
     spriteArray: SpriteFrame[] = [];
 
     //
-    // 整个绘制区域
+    // canvas
+    @property(Node)
+    canvas: Node
+
+    //
+    // canvas上所有的节点
     @property(Node)
     itemArray: Node[][] = [];
+
+    //
+    // top
+    @property(Layout)
+    top: Layout
 
     //
     // 区域
@@ -41,28 +61,77 @@ export class tetris extends Component {
     config: { w: number, h: number, bw: number, bh: number, my: boolean }
 
     onAdded(args) {
+        let uid = oops.storage.getUser();
         //
         // 创建
         oops.log.logView(args, "创建游戏");
         this.config = args;
         this.arena = new Arena(this.config.w, this.config.h);
-        this.player = new Player(this.arena);
+        this.player = new Player(this.arena, uid);
         this.player.reset();
 
-        this.player.events.on("score", (score) => {
-            this.score.string = `分数：${score}`;
+        //
+        // 所有玩家的事件
+        const pevents = ['pos', 'end', 'matrix'];
+        pevents.forEach(key => {
+            this.player.events.on(key, (val) => {
+                let player: ProtoPlayer = {
+                    pos: null,
+                    score: 0,
+                    matrix: null,
+                };
+                switch (key) {
+                    case "pos":
+                        player.pos = val;
+                        break
+                    case "matrix":
+                        player.matrix = val;
+                        break
+                    case "score":
+                        player.score = val;
+                        this.score.string = `分数：${val}`;
+                        break
+                }
+                //
+                // 发送之
+                let buf = UpdateState.encode(
+                    {
+                        fragment: "player",
+                        arena: null,
+                        player,
+                        playerId: uid,
+                        end: false
+                    }).finish();
+                gamechannel.gameNotify("r.updatestate", buf);
+
+                if (key !== "pos") {
+                    this.draw();
+                }
+
+            })
+
         })
 
-        this.player.events.on("pos", (pos) => {
-            this.draw();
-        })
-
-        this.player.events.on("matrix", (matrix) => {
-            this.draw();
-        })
-
-        this.arena.events.on("matrix", (matrix) => {
-            this.draw();
+        //
+        // 所有区域的事件
+        const aevents = ["matrix"];
+        aevents.forEach(key => {
+            this.arena.events.on("matrix", (matrix) => {
+                //
+                // 发送之
+                let buf = UpdateState.encode(
+                    {
+                        fragment: "player",
+                        arena: {
+                            matrix: matrix,
+                        },
+                        player: null,
+                        playerId: uid,
+                        end: false
+                    }).finish();
+                gamechannel.gameNotify("r.updatestate", buf);
+                this.draw();
+            })
         })
     }
 
@@ -72,13 +141,17 @@ export class tetris extends Component {
 
     start() {
         const matrix = this.arena.matrix;
+
+        const [w, h] = [this.config.bw * this.config.w, this.config.bh * this.config.h];
+        this.canvas.getComponent(UITransform).setContentSize(w, h);
         matrix.forEach((row, y) => {
             this.itemArray[y] = []
             row.forEach((value, x) => {
                 let item: Node = instantiate(this.block);
-                this.node.addChild(item);
-                item.setPosition(x * this.config.bw, this.config.bh * this.config.h - y * this.config.bh);
-                item.getComponent(UITransform).setContentSize(this.config.bw-1, this.config.bh-1);
+                this.canvas.addChild(item);
+                // oops.log.logView({x: x * this.config.bw, y: h - y * this.config.bh}, "pos");
+                item.setPosition(x * this.config.bw, h - (y + 1) * this.config.bh);
+                item.getComponent(UITransform).setContentSize(this.config.bw - 1, this.config.bh - 1);
                 this.itemArray[y][x] = item;
             })
         })
@@ -88,7 +161,7 @@ export class tetris extends Component {
         let node: Node = this.itemArray[0][0];
         let v3 = node.getPosition();
         this.score.fontSize = this.config.bw;
-        this.score.node.setPosition(v3.x + this.config.bw*2, v3.y + this.config.bw*2);
+        this.top.node.setPosition(v3.x + this.config.bw * 2, v3.y + this.config.bw * 2);
 
         //
         // 设置初始分数
@@ -135,8 +208,9 @@ export class tetris extends Component {
     }
 
     update(deltaTime: number) {
-        this.player.update(deltaTime);
-        // this.draw();
+        if (this.config.my) {
+            this.player.update(deltaTime);
+        }
     }
 }
 

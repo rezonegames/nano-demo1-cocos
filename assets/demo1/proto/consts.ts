@@ -11,27 +11,23 @@ export enum AccountType {
   UNRECOGNIZED = -1,
 }
 
+/** 暂时这样，以后拆出来，游戏内状态和游戏外状态 todo： */
 export enum GameState {
+  /** IDLE - 在房间里 */
   IDLE = 0,
   WAIT = 1,
-  WAITREADY = 2,
-  CANCEL = 3,
-  COUNTDOWN = 4,
-  GAMING = 5,
-  SETTLEMENT = 6,
+  /** INGAME - 已分到桌子 */
+  INGAME = 2,
   UNRECOGNIZED = -1,
 }
 
-export enum GameSubState {
-  SUBSTATE_NONE = 0,
-  WAITREADY_PROFILE = 1,
-  WAITREADY_COUNTDOWN = 2,
-  WAITREADY_READYLIST = 3,
-  COUNTDOWN_BEGIN = 4,
-  GAME_BEGIN = 5,
-  GAME_LOSE = 6,
-  SETTLEMENT_BEGIN = 7,
-  SETTLEMENT_END = 8,
+export enum TableState {
+  STATE_NONE = 0,
+  WAITREADY = 1,
+  CANCEL = 2,
+  COUNTDOWN = 3,
+  GAMING = 4,
+  SETTLEMENT = 5,
   UNRECOGNIZED = -1,
 }
 

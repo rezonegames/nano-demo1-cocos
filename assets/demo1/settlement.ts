@@ -1,9 +1,7 @@
-import { _decorator, Component, Button, Label } from 'cc';
+import { _decorator, Component, Button, Label, Node } from 'cc';
 import {ListView} from "db://assets/demo1/listview";
 import {oops} from "db://oops-framework/core/Oops";
-import {Cancel, GameStateResp, Player, Profile} from "db://assets/demo1/proto/client";
-import {CallbackObject} from "db://oops-framework/libs/network/NetInterface";
-import {gamechannel} from "db://assets/demo1/gamechannel";
+import {GameStateResp, Player, Profile, Room, TableInfo, TableInfo_Player} from "db://assets/demo1/proto/client";
 import {UIID} from "db://assets/script/game/common/config/GameUIConfig";
 const { ccclass, property } = _decorator;
 
@@ -19,28 +17,32 @@ export class settlement extends Component {
     @property(ListView)
     listView: ListView = null!;
 
-    resp: GameStateResp = null!;
+    tableInfo: TableInfo;
+    roomList: Room[];
 
     onAdded(args:any) {
-        this.resp = args
+        let gameState = args as GameStateResp;
+        this.roomList = gameState.roomList;
+        this.tableInfo = gameState.tableInfo;
     }
 
     start() {
         // 更新列表
-        let profiles: Profile[] = [];
-        for (const [k, v] of Object.entries(this.resp.profiles)) {
-            profiles.push(v);
+        let players: TableInfo_Player[] = [];
+        for (const [k, v] of Object.entries(this.tableInfo.players)) {
+            players.push(v);
         }
-        profiles = profiles.sort((a, b) => {
+        players = players.sort((a, b) => {
             return a.teamId - b.teamId;
         })
         this.listView.setDelegate({
-            items: () => profiles,
-            reuse: (itemNode: Node, item: Profile) => {
+            items: () => players,
+            reuse: (itemNode: Node, item: TableInfo_Player) => {
+                let p = item.profile;
                 itemNode.getChildByName("labTeam").getComponent(Label).string = `队伍：${item.teamId}队`;
-                itemNode.getChildByName("labName").getComponent(Label).string = `名字：${item.name}`;
+                itemNode.getChildByName("labName").getComponent(Label).string = `名字：${p.name}`;
                 let tip = "赢了";
-                if (this.resp.tableInfo?.loseTeams[item.teamId]) {
+                if (this.tableInfo?.loseTeams[item.teamId]) {
                     tip = "输了！！！";
                 }
                 itemNode.getChildByName("labState").getComponent(Label).string = tip;
@@ -56,7 +58,7 @@ export class settlement extends Component {
 
     onBtnClose() {
         oops.log.logView("", "关闭结算界面");
-        oops.gui.open(UIID.Hall, this.resp.roomList);
+        oops.gui.open(UIID.Hall, this.roomList);
         oops.gui.remove(UIID.Game);
         oops.gui.removeByNode(this.node, true);
     }

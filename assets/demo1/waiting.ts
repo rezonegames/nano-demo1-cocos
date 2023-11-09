@@ -1,13 +1,19 @@
-import {_decorator, Component, Node, Button, Label} from 'cc';
+import {_decorator, Component, Label, Node} from 'cc';
 import {oops} from "db://oops-framework/core/Oops";
-import {Cancel, CancelResp, GameStateResp, Join, Profile, Room} from "db://assets/demo1/proto/client";
+import {
+    Cancel,
+    CancelResp,
+    GameStateResp,
+    Profile,
+    Room,
+    TableInfo,
+    TableInfo_Player
+} from "db://assets/demo1/proto/client";
 import {CallbackObject} from "db://oops-framework/libs/network/NetInterface";
-import {UIID} from "db://assets/script/game/common/config/GameUIConfig";
 import {gamechannel} from "db://assets/demo1/gamechannel";
 import {GameEvent} from "db://assets/script/game/common/config/GameEvent";
-import {GameState, GameSubState} from "db://assets/demo1/proto/consts";
+import {GameState, TableState} from "db://assets/demo1/proto/consts";
 import {ListView} from "db://assets/demo1/listview";
-import {ErrorCode} from "db://assets/demo1/proto/error";
 
 const {ccclass, property} = _decorator;
 
@@ -31,8 +37,9 @@ export class waiting extends Component {
     @property(Node)
     btnReady: Node = null!;
 
-    profiles: Profile[] = [];
-    readys: { [key: number]: number } = {};
+    tableInfo: TableInfo
+
+    oldReadyList: { [key: number]: number } = {};
 
     onAdded(args: any) {
         oops.log.logView(args, "waiting");
@@ -45,11 +52,11 @@ export class waiting extends Component {
 
     start() {
         this.viewToWait();
-        oops.message.on(GameEvent.GameWaitReadyEvent, this.onUpdatePlayerState, this);
+        oops.message.on(GameEvent.TableEvent, this.onUpdatePlayerState, this);
     }
 
     protected onDestroy() {
-        oops.message.off(GameEvent.GameWaitReadyEvent, this.onUpdatePlayerState, this);
+        oops.message.off(GameEvent.TableEvent, this.onUpdatePlayerState, this);
     }
 
     public onBtnCancel() {
@@ -77,67 +84,77 @@ export class waiting extends Component {
     }
 
     public onUpdatePlayerState(event: string, args: any) {
-        let resp: GameStateResp = args as GameStateResp;
-        if (resp.state == GameState.WAITREADY) {
-            this.btnReady.active = true;
-            this.labCountDown.node.active = true;
-            this.listView.node.active = true;
-            this.labTest.node.active = false;
-            let needRefreshList = false;
-            switch (resp.subState) {
-                case GameSubState.WAITREADY_PROFILE:
-                    break;
-                case GameSubState.WAITREADY_COUNTDOWN:
-                    this.labCountDown.string = `倒计时：${resp.countDown}`;
-                    let uid = oops.storage.getUser();
-                    if (resp.countDown == 1 && !(uid in this.readys)) {
-                        oops.gui.removeByNode(this.node, true);
-                    }
-                    break;
-                case GameSubState.WAITREADY_READYLIST:
-                    this.readys = resp.readys;
-                    needRefreshList = true;
-                    break
-            }
-            if (this.profiles.length <= 0) {
-                let profiles: Profile[] = [];
-                for (const [k, v] of Object.entries(resp.profiles)) {
-                    profiles.push(v);
+        let gameState = args as GameStateResp;
+
+        switch (gameState.state) {
+            case GameState.WAIT:
+                this.viewToWait();
+                break;
+            case GameState.INGAME:
+                this.tableInfo = gameState.tableInfo;
+                switch (this.tableInfo.tableState) {
+                    case TableState.WAITREADY:
+                        this.btnReady.active = true;
+                        this.labCountDown.node.active = true;
+                        this.listView.node.active = true;
+                        this.labTest.node.active = false;
+
+                        let countDown = this.tableInfo.waiter.countDown;
+                        let readys = this.tableInfo.waiter.readys;
+                        let uid = oops.storage.getUser();
+
+                        //
+                        // 更新ui
+                        this.labCountDown.string = `倒计时：${countDown}`;
+                        if (countDown == 1 && !(uid in readys)) {
+                            oops.gui.removeByNode(this.node, true);
+                        }
+
+                        //
+                        // 更新list
+                        if(Object.keys(readys).length == Object.keys(this.oldReadyList).length) {
+                            return;
+                        }
+
+                        let profiles: TableInfo_Player[] = [];
+                        for(const k in this.tableInfo.players) {
+                            let p = this.tableInfo.players[k];
+                            profiles.push(p);
+                        }
+                        profiles = profiles.sort((a, b) => {
+                            return a.teamId - b.teamId;
+                        })
+                        this.updateWaitView(profiles, readys);
+                        this.oldReadyList = readys;
+                        break;
+
                 }
-                this.profiles = profiles.sort((a, b) => {
-                    return a.teamId - b.teamId;
-                })
-                needRefreshList = true;
-            }
-            if (!needRefreshList) {
-                return;
-            }
-            this.updateWaitView();
-        } else if (resp.state == GameState.WAIT) {
-            this.viewToWait();
+
+                break;
         }
     }
 
     viewToWait() {
+        this.tableInfo = null;
         this.btnReady.active = false;
         this.labCountDown.node.active = false;
         this.listView.node.active = false;
         this.labTest.node.active = true;
-        this.readys = {};
-        this.profiles = [];
         this.labInfo.string = `房间信息：名字：${this.room.name} 房间ID：${this.room.roomId}`;
-        this.updateWaitView();
+        this.updateWaitView([], {});
     }
 
-    updateWaitView() {
+    updateWaitView(profiles:TableInfo_Player[], readys: { [key: number]: number }) {
+        //
         // 更新列表
         this.listView.setDelegate({
-            items: () => this.profiles,
-            reuse: (itemNode: Node, item: Profile) => {
+            items: () => profiles,
+            reuse: (itemNode: Node, item: TableInfo_Player) => {
+                let p = item.profile;
                 itemNode.getChildByName("labTeam").getComponent(Label).string = `队伍：${item.teamId}队`;
-                itemNode.getChildByName("labName").getComponent(Label).string = `名字：${item.name}`;
+                itemNode.getChildByName("labName").getComponent(Label).string = `名字：${p.name}`;
                 let tip = "等待玩家准备";
-                if (this.readys[item.userId]) {
+                if (readys[p.userId]) {
                     tip = "已准备";
                 }
                 itemNode.getChildByName("labState").getComponent(Label).string = `准备状态：${tip}`;

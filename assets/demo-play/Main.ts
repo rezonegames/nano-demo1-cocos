@@ -26,7 +26,6 @@ export class Main extends Root {
             }
             //
             // 玩家自己
-
             this.myPlayer = this.createTetris(prefab, {
                 w: 12,
                 h: 20,
@@ -47,12 +46,12 @@ export class Main extends Root {
 
             //
             // 其他人
-            // this.createTetris(prefab, {
-            //     w: 12,
-            //     h: 20,
-            //     bw: 30,
-            //     bh: 30
-            // }, {x: 400, y: -400})
+            this.createTetris(prefab, {
+                w: 12,
+                h: 20,
+                bw: 22,
+                bh: 22
+            }, {x: 400, y: -400})
 
         });
 
@@ -64,7 +63,6 @@ export class Main extends Root {
         t.onAdded(config);
         let w = config.w * config.bw;
         let h = config.h * config.bh;
-        node.getComponent(UITransform).setContentSize(w, h);
         this.gui.addChild(node);
         node.setPosition(-w / 2 + offset.x, -h / 2 + offset.y);
         return t.player;

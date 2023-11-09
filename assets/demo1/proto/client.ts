@@ -1,7 +1,7 @@
 /* eslint-disable */
 import Long from "long";
 import _m0 from "protobufjs/minimal.js";
-import { GameState, GameSubState } from "./consts.js";
+import { GameState, TableState } from "./consts.js";
 import { ErrorCode } from "./error.js";
 
 export const protobufPackage = "proto";
@@ -21,7 +21,6 @@ export interface Profile {
   name: string;
   coin: number;
   userId: number;
-  teamId: number;
   updatedAt: number;
 }
 
@@ -77,30 +76,13 @@ export interface LeaveResp {
   code: ErrorCode;
 }
 
-export interface CountDownResp {
-  code: ErrorCode;
-  counter: number;
-}
-
+/** 在每一个步骤，下发游戏状态 */
 export interface GameStateResp {
   code: ErrorCode;
+  errMsg: string;
   state: GameState;
-  subState: GameSubState;
   tableInfo: TableInfo | undefined;
-  readys: { [key: number]: number };
-  profiles: { [key: number]: Profile };
-  countDown: number;
   roomList: Room[];
-}
-
-export interface GameStateResp_ReadysEntry {
-  key: number;
-  value: number;
-}
-
-export interface GameStateResp_ProfilesEntry {
-  key: number;
-  value: Profile | undefined;
 }
 
 /** TwoArray 二维数组[1:[0,0],2:[0,0]] */
@@ -115,35 +97,48 @@ export interface Pos {
   y: number;
 }
 
+/** 玩家数据 */
 export interface Player {
   matrix: Array[];
   pos: Pos | undefined;
   score: number;
 }
 
+/** 区域数据 */
+export interface Arena {
+  matrix: Array[];
+}
+
 export interface State {
-  arena: Array[];
+  arena: Arena | undefined;
   player: Player | undefined;
 }
 
-/** UpdateState 玩家上传的方块数据 */
+/** UpdateState 玩家上传数据，包括arena数据和player数据 */
 export interface UpdateState {
+  /** arena|player */
   fragment: string;
   /** pos|matrix|score */
   player:
     | Player
     | undefined;
   /** arena */
-  arena: Array[];
+  arena:
+    | Arena
+    | undefined;
+  /**  */
   playerId: number;
   end: boolean;
 }
 
+/** 下发桌子信息 */
 export interface TableInfo {
   players: { [key: number]: TableInfo_Player };
   tableId: string;
-  tableState: GameState;
+  tableState: TableState;
   loseTeams: { [key: number]: number };
+  waiter: TableInfo_Waiter | undefined;
+  countDown: number;
 }
 
 export interface TableInfo_Player {
@@ -151,6 +146,17 @@ export interface TableInfo_Player {
   state: State | undefined;
   end: boolean;
   score: number;
+  profile: Profile | undefined;
+}
+
+export interface TableInfo_Waiter {
+  readys: { [key: number]: number };
+  countDown: number;
+}
+
+export interface TableInfo_Waiter_ReadysEntry {
+  key: number;
+  value: number;
 }
 
 export interface TableInfo_PlayersEntry {
@@ -262,7 +268,7 @@ export const LoginToGame = {
 };
 
 function createBaseProfile(): Profile {
-  return { name: "", coin: 0, userId: 0, teamId: 0, updatedAt: 0 };
+  return { name: "", coin: 0, userId: 0, updatedAt: 0 };
 }
 
 export const Profile = {
@@ -275,9 +281,6 @@ export const Profile = {
     }
     if (message.userId !== 0) {
       writer.uint32(24).int64(message.userId);
-    }
-    if (message.teamId !== 0) {
-      writer.uint32(32).int32(message.teamId);
     }
     if (message.updatedAt !== 0) {
       writer.uint32(80).int64(message.updatedAt);
@@ -312,13 +315,6 @@ export const Profile = {
           }
 
           message.userId = longToNumber(reader.int64() as Long);
-          continue;
-        case 4:
-          if (tag !== 32) {
-            break;
-          }
-
-          message.teamId = reader.int32();
           continue;
         case 10:
           if (tag !== 80) {
@@ -803,54 +799,8 @@ export const LeaveResp = {
   },
 };
 
-function createBaseCountDownResp(): CountDownResp {
-  return { code: 0, counter: 0 };
-}
-
-export const CountDownResp = {
-  encode(message: CountDownResp, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.code !== 0) {
-      writer.uint32(24).int32(message.code);
-    }
-    if (message.counter !== 0) {
-      writer.uint32(8).int32(message.counter);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): CountDownResp {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseCountDownResp();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 3:
-          if (tag !== 24) {
-            break;
-          }
-
-          message.code = reader.int32() as any;
-          continue;
-        case 1:
-          if (tag !== 8) {
-            break;
-          }
-
-          message.counter = reader.int32();
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-};
-
 function createBaseGameStateResp(): GameStateResp {
-  return { code: 0, state: 0, subState: 0, tableInfo: undefined, readys: {}, profiles: {}, countDown: 0, roomList: [] };
+  return { code: 0, errMsg: "", state: 0, tableInfo: undefined, roomList: [] };
 }
 
 export const GameStateResp = {
@@ -858,26 +808,17 @@ export const GameStateResp = {
     if (message.code !== 0) {
       writer.uint32(8).int32(message.code);
     }
-    if (message.state !== 0) {
-      writer.uint32(16).int32(message.state);
+    if (message.errMsg !== "") {
+      writer.uint32(18).string(message.errMsg);
     }
-    if (message.subState !== 0) {
-      writer.uint32(80).int32(message.subState);
+    if (message.state !== 0) {
+      writer.uint32(24).int32(message.state);
     }
     if (message.tableInfo !== undefined) {
-      TableInfo.encode(message.tableInfo, writer.uint32(26).fork()).ldelim();
-    }
-    Object.entries(message.readys).forEach(([key, value]) => {
-      GameStateResp_ReadysEntry.encode({ key: key as any, value }, writer.uint32(34).fork()).ldelim();
-    });
-    Object.entries(message.profiles).forEach(([key, value]) => {
-      GameStateResp_ProfilesEntry.encode({ key: key as any, value }, writer.uint32(42).fork()).ldelim();
-    });
-    if (message.countDown !== 0) {
-      writer.uint32(48).int32(message.countDown);
+      TableInfo.encode(message.tableInfo, writer.uint32(42).fork()).ldelim();
     }
     for (const v of message.roomList) {
-      Room.encode(v!, writer.uint32(58).fork()).ldelim();
+      Room.encode(v!, writer.uint32(50).fork()).ldelim();
     }
     return writer;
   },
@@ -897,151 +838,32 @@ export const GameStateResp = {
           message.code = reader.int32() as any;
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.errMsg = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
             break;
           }
 
           message.state = reader.int32() as any;
-          continue;
-        case 10:
-          if (tag !== 80) {
-            break;
-          }
-
-          message.subState = reader.int32() as any;
-          continue;
-        case 3:
-          if (tag !== 26) {
-            break;
-          }
-
-          message.tableInfo = TableInfo.decode(reader, reader.uint32());
-          continue;
-        case 4:
-          if (tag !== 34) {
-            break;
-          }
-
-          const entry4 = GameStateResp_ReadysEntry.decode(reader, reader.uint32());
-          if (entry4.value !== undefined) {
-            message.readys[entry4.key] = entry4.value;
-          }
           continue;
         case 5:
           if (tag !== 42) {
             break;
           }
 
-          const entry5 = GameStateResp_ProfilesEntry.decode(reader, reader.uint32());
-          if (entry5.value !== undefined) {
-            message.profiles[entry5.key] = entry5.value;
-          }
+          message.tableInfo = TableInfo.decode(reader, reader.uint32());
           continue;
         case 6:
-          if (tag !== 48) {
-            break;
-          }
-
-          message.countDown = reader.int32();
-          continue;
-        case 7:
-          if (tag !== 58) {
+          if (tag !== 50) {
             break;
           }
 
           message.roomList.push(Room.decode(reader, reader.uint32()));
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-};
-
-function createBaseGameStateResp_ReadysEntry(): GameStateResp_ReadysEntry {
-  return { key: 0, value: 0 };
-}
-
-export const GameStateResp_ReadysEntry = {
-  encode(message: GameStateResp_ReadysEntry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.key !== 0) {
-      writer.uint32(8).int64(message.key);
-    }
-    if (message.value !== 0) {
-      writer.uint32(16).int64(message.value);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): GameStateResp_ReadysEntry {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseGameStateResp_ReadysEntry();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 8) {
-            break;
-          }
-
-          message.key = longToNumber(reader.int64() as Long);
-          continue;
-        case 2:
-          if (tag !== 16) {
-            break;
-          }
-
-          message.value = longToNumber(reader.int64() as Long);
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-};
-
-function createBaseGameStateResp_ProfilesEntry(): GameStateResp_ProfilesEntry {
-  return { key: 0, value: undefined };
-}
-
-export const GameStateResp_ProfilesEntry = {
-  encode(message: GameStateResp_ProfilesEntry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.key !== 0) {
-      writer.uint32(8).int64(message.key);
-    }
-    if (message.value !== undefined) {
-      Profile.encode(message.value, writer.uint32(18).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): GameStateResp_ProfilesEntry {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseGameStateResp_ProfilesEntry();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 8) {
-            break;
-          }
-
-          message.key = longToNumber(reader.int64() as Long);
-          continue;
-        case 2:
-          if (tag !== 18) {
-            break;
-          }
-
-          message.value = Profile.decode(reader, reader.uint32());
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -1213,14 +1035,50 @@ export const Player = {
   },
 };
 
+function createBaseArena(): Arena {
+  return { matrix: [] };
+}
+
+export const Arena = {
+  encode(message: Arena, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.matrix) {
+      Array.encode(v!, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): Arena {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseArena();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.matrix.push(Array.decode(reader, reader.uint32()));
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
 function createBaseState(): State {
-  return { arena: [], player: undefined };
+  return { arena: undefined, player: undefined };
 }
 
 export const State = {
   encode(message: State, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    for (const v of message.arena) {
-      Array.encode(v!, writer.uint32(10).fork()).ldelim();
+    if (message.arena !== undefined) {
+      Arena.encode(message.arena, writer.uint32(10).fork()).ldelim();
     }
     if (message.player !== undefined) {
       Player.encode(message.player, writer.uint32(18).fork()).ldelim();
@@ -1240,7 +1098,7 @@ export const State = {
             break;
           }
 
-          message.arena.push(Array.decode(reader, reader.uint32()));
+          message.arena = Arena.decode(reader, reader.uint32());
           continue;
         case 2:
           if (tag !== 18) {
@@ -1260,22 +1118,22 @@ export const State = {
 };
 
 function createBaseUpdateState(): UpdateState {
-  return { fragment: "", player: undefined, arena: [], playerId: 0, end: false };
+  return { fragment: "", player: undefined, arena: undefined, playerId: 0, end: false };
 }
 
 export const UpdateState = {
   encode(message: UpdateState, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.fragment !== "") {
-      writer.uint32(26).string(message.fragment);
+      writer.uint32(10).string(message.fragment);
     }
     if (message.player !== undefined) {
-      Player.encode(message.player, writer.uint32(34).fork()).ldelim();
+      Player.encode(message.player, writer.uint32(18).fork()).ldelim();
     }
-    for (const v of message.arena) {
-      Array.encode(v!, writer.uint32(42).fork()).ldelim();
+    if (message.arena !== undefined) {
+      Arena.encode(message.arena, writer.uint32(26).fork()).ldelim();
     }
     if (message.playerId !== 0) {
-      writer.uint32(48).int64(message.playerId);
+      writer.uint32(32).int64(message.playerId);
     }
     if (message.end === true) {
       writer.uint32(80).bool(message.end);
@@ -1290,29 +1148,29 @@ export const UpdateState = {
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
-        case 3:
-          if (tag !== 26) {
+        case 1:
+          if (tag !== 10) {
             break;
           }
 
           message.fragment = reader.string();
           continue;
-        case 4:
-          if (tag !== 34) {
+        case 2:
+          if (tag !== 18) {
             break;
           }
 
           message.player = Player.decode(reader, reader.uint32());
           continue;
-        case 5:
-          if (tag !== 42) {
+        case 3:
+          if (tag !== 26) {
             break;
           }
 
-          message.arena.push(Array.decode(reader, reader.uint32()));
+          message.arena = Arena.decode(reader, reader.uint32());
           continue;
-        case 6:
-          if (tag !== 48) {
+        case 4:
+          if (tag !== 32) {
             break;
           }
 
@@ -1336,7 +1194,7 @@ export const UpdateState = {
 };
 
 function createBaseTableInfo(): TableInfo {
-  return { players: {}, tableId: "", tableState: 0, loseTeams: {} };
+  return { players: {}, tableId: "", tableState: 0, loseTeams: {}, waiter: undefined, countDown: 0 };
 }
 
 export const TableInfo = {
@@ -1351,8 +1209,14 @@ export const TableInfo = {
       writer.uint32(24).int32(message.tableState);
     }
     Object.entries(message.loseTeams).forEach(([key, value]) => {
-      TableInfo_LoseTeamsEntry.encode({ key: key as any, value }, writer.uint32(34).fork()).ldelim();
+      TableInfo_LoseTeamsEntry.encode({ key: key as any, value }, writer.uint32(42).fork()).ldelim();
     });
+    if (message.waiter !== undefined) {
+      TableInfo_Waiter.encode(message.waiter, writer.uint32(50).fork()).ldelim();
+    }
+    if (message.countDown !== 0) {
+      writer.uint32(56).int32(message.countDown);
+    }
     return writer;
   },
 
@@ -1387,15 +1251,29 @@ export const TableInfo = {
 
           message.tableState = reader.int32() as any;
           continue;
-        case 4:
-          if (tag !== 34) {
+        case 5:
+          if (tag !== 42) {
             break;
           }
 
-          const entry4 = TableInfo_LoseTeamsEntry.decode(reader, reader.uint32());
-          if (entry4.value !== undefined) {
-            message.loseTeams[entry4.key] = entry4.value;
+          const entry5 = TableInfo_LoseTeamsEntry.decode(reader, reader.uint32());
+          if (entry5.value !== undefined) {
+            message.loseTeams[entry5.key] = entry5.value;
           }
+          continue;
+        case 6:
+          if (tag !== 50) {
+            break;
+          }
+
+          message.waiter = TableInfo_Waiter.decode(reader, reader.uint32());
+          continue;
+        case 7:
+          if (tag !== 56) {
+            break;
+          }
+
+          message.countDown = reader.int32();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -1408,7 +1286,7 @@ export const TableInfo = {
 };
 
 function createBaseTableInfo_Player(): TableInfo_Player {
-  return { teamId: 0, state: undefined, end: false, score: 0 };
+  return { teamId: 0, state: undefined, end: false, score: 0, profile: undefined };
 }
 
 export const TableInfo_Player = {
@@ -1424,6 +1302,9 @@ export const TableInfo_Player = {
     }
     if (message.score !== 0) {
       writer.uint32(32).int32(message.score);
+    }
+    if (message.profile !== undefined) {
+      Profile.encode(message.profile, writer.uint32(42).fork()).ldelim();
     }
     return writer;
   },
@@ -1462,6 +1343,108 @@ export const TableInfo_Player = {
           }
 
           message.score = reader.int32();
+          continue;
+        case 5:
+          if (tag !== 42) {
+            break;
+          }
+
+          message.profile = Profile.decode(reader, reader.uint32());
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseTableInfo_Waiter(): TableInfo_Waiter {
+  return { readys: {}, countDown: 0 };
+}
+
+export const TableInfo_Waiter = {
+  encode(message: TableInfo_Waiter, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    Object.entries(message.readys).forEach(([key, value]) => {
+      TableInfo_Waiter_ReadysEntry.encode({ key: key as any, value }, writer.uint32(34).fork()).ldelim();
+    });
+    if (message.countDown !== 0) {
+      writer.uint32(48).int32(message.countDown);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): TableInfo_Waiter {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTableInfo_Waiter();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          const entry4 = TableInfo_Waiter_ReadysEntry.decode(reader, reader.uint32());
+          if (entry4.value !== undefined) {
+            message.readys[entry4.key] = entry4.value;
+          }
+          continue;
+        case 6:
+          if (tag !== 48) {
+            break;
+          }
+
+          message.countDown = reader.int32();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseTableInfo_Waiter_ReadysEntry(): TableInfo_Waiter_ReadysEntry {
+  return { key: 0, value: 0 };
+}
+
+export const TableInfo_Waiter_ReadysEntry = {
+  encode(message: TableInfo_Waiter_ReadysEntry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.key !== 0) {
+      writer.uint32(8).int64(message.key);
+    }
+    if (message.value !== 0) {
+      writer.uint32(16).int64(message.value);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): TableInfo_Waiter_ReadysEntry {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTableInfo_Waiter_ReadysEntry();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.key = longToNumber(reader.int64() as Long);
+          continue;
+        case 2:
+          if (tag !== 16) {
+            break;
+          }
+
+          message.value = longToNumber(reader.int64() as Long);
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
