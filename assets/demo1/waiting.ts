@@ -112,7 +112,7 @@ export class waiting extends Component {
 
                         //
                         // 更新list
-                        if(Object.keys(readys).length == Object.keys(this.oldReadyList).length) {
+                        if(Object.keys(readys).length !=0 && Object.keys(readys).length == Object.keys(this.oldReadyList).length) {
                             return;
                         }
 

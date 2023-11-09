@@ -44,6 +44,8 @@ export class game extends Component {
         switch (this.tableInfo.tableState) {
             case TableState.COUNTDOWN:
                 if (this.tableInfo.countDown == 0) {
+
+
                     this.labCountDown.node.active = false;
                 } else {
                     this.labCountDown.string = `游戏马上开始了：${this.tableInfo.countDown}`;
@@ -55,8 +57,6 @@ export class game extends Component {
                 break;
 
         }
-
-
     }
 }
 
