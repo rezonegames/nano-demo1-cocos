@@ -49,7 +49,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 150,
+      "y": 9.349,
       "z": 0
     },
     "_lrot": {
@@ -235,7 +235,7 @@
     "_string": "关闭",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 24.066666666666666,
+    "_actualFontSize": 20,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -282,8 +282,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 200,
-      "height": 80
+      "width": 150,
+      "height": 70
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -686,7 +686,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -394.5847832315292,
+      "x": -240,
       "y": 0,
       "z": 0
     },
@@ -727,8 +727,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 149.95843353694164,
-      "height": 37.800000000000004
+      "width": 100,
+      "height": 37.8
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -766,8 +766,8 @@
     "_string": "名字：测试",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 36.1,
-    "_fontSize": 30,
+    "_actualFontSize": 20,
+    "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 30,
     "_overflow": 0,
@@ -822,7 +822,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -151.28222080321592,
+      "x": -114.4384765625,
       "y": 0,
       "z": 0
     },
@@ -863,8 +863,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 136.6466913196849,
-      "height": 37.800000000000004
+      "width": 91.123046875,
+      "height": 37.8
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -902,8 +902,8 @@
     "_string": "队伍：1队",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 36.1,
-    "_fontSize": 30,
+    "_actualFontSize": 20,
+    "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 30,
     "_overflow": 0,
@@ -958,7 +958,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 37.041124856626524,
+      "x": -18.876953125,
       "y": 0,
       "z": 0
     },
@@ -1094,7 +1094,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 187.03281156401488,
+      "x": 51.123046875,
       "y": 0,
       "z": 0
     },
@@ -1135,7 +1135,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 59.98337341477666,
+      "width": 40,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -1174,8 +1174,8 @@
     "_string": "输了",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 36.1,
-    "_fontSize": 30,
+    "_actualFontSize": 20,
+    "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
     "_overflow": 0,
@@ -1221,7 +1221,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 939.1279999999999,
+      "width": 590,
       "height": 51.281000000000006
     },
     "_anchorPoint": {
@@ -1255,11 +1255,11 @@
       "height": 40
     },
     "_startAxis": 0,
-    "_paddingLeft": 0,
+    "_paddingLeft": 5,
     "_paddingRight": 0,
     "_paddingTop": 0,
     "_paddingBottom": 0,
-    "_spacingX": 100,
+    "_spacingX": 30,
     "_spacingY": 0,
     "_verticalDirection": 1,
     "_horizontalDirection": 0,
@@ -1345,7 +1345,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 950,
+      "width": 600,
       "height": 600
     },
     "_anchorPoint": {
@@ -1386,7 +1386,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 950,
+      "width": 600,
       "height": 600
     },
     "_anchorPoint": {
@@ -1495,7 +1495,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 950,
+      "width": 600,
       "height": 600
     },
     "_anchorPoint": {
@@ -1684,7 +1684,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 671.1252651056094,
+      "width": 335.5859375,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -1723,8 +1723,8 @@
     "_string": "结算-房间信息：名字：1v1 房间ID：1",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 48.13333333333333,
-    "_fontSize": 40,
+    "_actualFontSize": 20,
+    "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
     "_overflow": 0,
@@ -1833,7 +1833,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 20.007446796279865,
+      "x": -3.3154296875,
       "y": 0,
       "z": 0
     },
@@ -1874,7 +1874,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 140.01489359255973,
+      "width": 93.369140625,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -1913,8 +1913,8 @@
     "_string": "金币：300",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 36.1,
-    "_fontSize": 30,
+    "_actualFontSize": 20,
+    "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
     "_overflow": 0,
@@ -2039,7 +2039,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 1000,
+      "width": 650,
       "height": 1000
     },
     "_anchorPoint": {

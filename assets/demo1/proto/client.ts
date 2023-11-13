@@ -85,10 +85,13 @@ export interface GameStateResp {
   roomList: Room[];
 }
 
-/** TwoArray 二维数组[1:[0,0],2:[0,0]] */
-export interface Array {
-  v: number[];
-  i: number;
+/** TwoArray 二维数组[[0,0],[0,0]] */
+export interface Row {
+  values: number[];
+}
+
+export interface Array2 {
+  rows: Row[];
 }
 
 /** Pos 坐标 */
@@ -99,14 +102,14 @@ export interface Pos {
 
 /** 玩家数据 */
 export interface Player {
-  matrix: Array[];
+  matrix: Array2 | undefined;
   pos: Pos | undefined;
   score: number;
 }
 
 /** 区域数据 */
 export interface Arena {
-  matrix: Array[];
+  matrix: Array2 | undefined;
 }
 
 export interface State {
@@ -139,6 +142,7 @@ export interface TableInfo {
   loseTeams: { [key: number]: number };
   waiter: TableInfo_Waiter | undefined;
   countDown: number;
+  room: Room | undefined;
 }
 
 export interface TableInfo_Player {
@@ -875,33 +879,30 @@ export const GameStateResp = {
   },
 };
 
-function createBaseArray(): Array {
-  return { v: [], i: 0 };
+function createBaseRow(): Row {
+  return { values: [] };
 }
 
-export const Array = {
-  encode(message: Array, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+export const Row = {
+  encode(message: Row, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     writer.uint32(10).fork();
-    for (const v of message.v) {
-      writer.uint32(v);
+    for (const v of message.values) {
+      writer.int32(v);
     }
     writer.ldelim();
-    if (message.i !== 0) {
-      writer.uint32(16).int32(message.i);
-    }
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): Array {
+  decode(input: _m0.Reader | Uint8Array, length?: number): Row {
     const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseArray();
+    const message = createBaseRow();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
           if (tag === 8) {
-            message.v.push(reader.uint32());
+            message.values.push(reader.int32());
 
             continue;
           }
@@ -909,19 +910,48 @@ export const Array = {
           if (tag === 10) {
             const end2 = reader.uint32() + reader.pos;
             while (reader.pos < end2) {
-              message.v.push(reader.uint32());
+              message.values.push(reader.int32());
             }
 
             continue;
           }
 
           break;
-        case 2:
-          if (tag !== 16) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseArray2(): Array2 {
+  return { rows: [] };
+}
+
+export const Array2 = {
+  encode(message: Array2, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.rows) {
+      Row.encode(v!, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): Array2 {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseArray2();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
             break;
           }
 
-          message.i = reader.int32();
+          message.rows.push(Row.decode(reader, reader.uint32()));
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -980,13 +1010,13 @@ export const Pos = {
 };
 
 function createBasePlayer(): Player {
-  return { matrix: [], pos: undefined, score: 0 };
+  return { matrix: undefined, pos: undefined, score: 0 };
 }
 
 export const Player = {
   encode(message: Player, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    for (const v of message.matrix) {
-      Array.encode(v!, writer.uint32(10).fork()).ldelim();
+    if (message.matrix !== undefined) {
+      Array2.encode(message.matrix, writer.uint32(10).fork()).ldelim();
     }
     if (message.pos !== undefined) {
       Pos.encode(message.pos, writer.uint32(18).fork()).ldelim();
@@ -1009,7 +1039,7 @@ export const Player = {
             break;
           }
 
-          message.matrix.push(Array.decode(reader, reader.uint32()));
+          message.matrix = Array2.decode(reader, reader.uint32());
           continue;
         case 2:
           if (tag !== 18) {
@@ -1036,13 +1066,13 @@ export const Player = {
 };
 
 function createBaseArena(): Arena {
-  return { matrix: [] };
+  return { matrix: undefined };
 }
 
 export const Arena = {
   encode(message: Arena, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    for (const v of message.matrix) {
-      Array.encode(v!, writer.uint32(10).fork()).ldelim();
+    if (message.matrix !== undefined) {
+      Array2.encode(message.matrix, writer.uint32(10).fork()).ldelim();
     }
     return writer;
   },
@@ -1059,7 +1089,7 @@ export const Arena = {
             break;
           }
 
-          message.matrix.push(Array.decode(reader, reader.uint32()));
+          message.matrix = Array2.decode(reader, reader.uint32());
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -1194,7 +1224,7 @@ export const UpdateState = {
 };
 
 function createBaseTableInfo(): TableInfo {
-  return { players: {}, tableId: "", tableState: 0, loseTeams: {}, waiter: undefined, countDown: 0 };
+  return { players: {}, tableId: "", tableState: 0, loseTeams: {}, waiter: undefined, countDown: 0, room: undefined };
 }
 
 export const TableInfo = {
@@ -1216,6 +1246,9 @@ export const TableInfo = {
     }
     if (message.countDown !== 0) {
       writer.uint32(56).int32(message.countDown);
+    }
+    if (message.room !== undefined) {
+      Room.encode(message.room, writer.uint32(66).fork()).ldelim();
     }
     return writer;
   },
@@ -1274,6 +1307,13 @@ export const TableInfo = {
           }
 
           message.countDown = reader.int32();
+          continue;
+        case 8:
+          if (tag !== 66) {
+            break;
+          }
+
+          message.room = Room.decode(reader, reader.uint32());
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {

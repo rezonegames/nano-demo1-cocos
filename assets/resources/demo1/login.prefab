@@ -146,7 +146,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -211.267,
+      "x": -114.725,
       "y": 0,
       "z": 0
     },
@@ -187,8 +187,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 549.938863400277,
-      "height": 50.400000000000006
+      "width": 330,
+      "height": 50.4
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -226,8 +226,8 @@
     "_string": "无账号，登录游戏后注册",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 60.16666666666667,
-    "_fontSize": 50,
+    "_actualFontSize": 30,
+    "_fontSize": 30,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
     "_overflow": 0,
@@ -289,7 +289,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 246.607,
+      "x": 220.607,
       "y": -0.259,
       "z": 0
     },
@@ -419,7 +419,7 @@
     "_string": "进入游戏",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 36.1,
+    "_actualFontSize": 30,
     "_fontSize": 30,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -723,8 +723,8 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 0,
-      "y": -149.486,
+      "x": -268.792,
+      "y": -169.006,
       "z": 0
     },
     "_lrot": {
@@ -780,7 +780,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 0,
+      "x": 50,
       "y": 0,
       "z": 0
     },
@@ -910,7 +910,7 @@
     "_string": "Guest登录",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 36.1,
+    "_actualFontSize": 30,
     "_fontSize": 30,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -1134,7 +1134,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -253.25900000000001,
+      "x": 270,
       "y": 0,
       "z": 0
     },
@@ -1264,7 +1264,7 @@
     "_string": "微信登录",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 36.1,
+    "_actualFontSize": 30,
     "_fontSize": 30,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -1488,7 +1488,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 253.04399999999998,
+      "x": 490,
       "y": 0,
       "z": 0
     },
@@ -1618,7 +1618,7 @@
     "_string": "Facebook登录",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 36.1,
+    "_actualFontSize": 30,
     "_fontSize": 30,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -1853,7 +1853,7 @@
       "__id__": 78
     },
     "_resizeMode": 0,
-    "_layoutType": 0,
+    "_layoutType": 1,
     "_cellSize": {
       "__type__": "cc.Size",
       "width": 40,
@@ -1864,7 +1864,7 @@
     "_paddingRight": 0,
     "_paddingTop": 0,
     "_paddingBottom": 0,
-    "_spacingX": 0,
+    "_spacingX": 20,
     "_spacingY": 0,
     "_verticalDirection": 1,
     "_horizontalDirection": 0,

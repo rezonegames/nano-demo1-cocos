@@ -2,11 +2,22 @@
   "__version__": "1.0.5",
   "general": {
     "designResolution": {
-      "width": 1200,
-      "height": 720,
+      "width": 720,
+      "height": 1280,
       "fitWidth": false,
       "fitHeight": true
-    }
+    },
+    "renderPipeline": "fd8ec536-a354-4a17-9c74-4f3883c378c8"
   },
-  "custom_joint_texture_layouts": []
+  "custom_joint_texture_layouts": [],
+  "sorting-layer": {
+    "layers": [
+      {
+        "id": 0,
+        "name": "default",
+        "value": 0
+      }
+    ],
+    "increaseId": 2
+  }
 }
