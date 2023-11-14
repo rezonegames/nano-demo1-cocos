@@ -148,15 +148,14 @@ export class Player {
         this.pos.y = 0;
         this.pos.x = (this.arena.matrix[0].length / 2 | 0) -
             (this.matrix[0].length / 2 | 0);
+        this.events.emit('pos', this.pos);
+        this.events.emit('matrix', this.matrix);
         if (this.arena.collide(this)) {
             // this.arena.clear();
             // this.score = 0;
             this.end = true;
             this.events.emit('end', null);
         }
-
-        this.events.emit('pos', this.pos);
-        this.events.emit('matrix', this.matrix);
     }
 
     rotate(dir) {

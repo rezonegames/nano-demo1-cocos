@@ -258,7 +258,7 @@ export class NetChannelManager {
                 case GameState.INGAME:
                     let tableInfo = resp.tableInfo;
                     switch (tableInfo.tableState) {
-                        case TableState.COUNTDOWN:
+                        case TableState.CHECK_RES:
                             oops.gui.remove(UIID.Waiting);
                             oops.gui.remove(UIID.Hall);
                             oops.gui.open(UIID.Game);

@@ -132,16 +132,16 @@ export interface UpdateState {
   /**  */
   playerId: number;
   end: boolean;
+  resOK: boolean;
 }
 
 /** 下发桌子信息 */
 export interface TableInfo {
-  players: { [key: number]: TableInfo_Player };
   tableId: string;
   tableState: TableState;
+  players: { [key: number]: TableInfo_Player };
   loseTeams: { [key: number]: number };
   waiter: TableInfo_Waiter | undefined;
-  countDown: number;
   room: Room | undefined;
 }
 
@@ -151,6 +151,7 @@ export interface TableInfo_Player {
   end: boolean;
   score: number;
   profile: Profile | undefined;
+  resOK: boolean;
 }
 
 export interface TableInfo_Waiter {
@@ -1148,7 +1149,7 @@ export const State = {
 };
 
 function createBaseUpdateState(): UpdateState {
-  return { fragment: "", player: undefined, arena: undefined, playerId: 0, end: false };
+  return { fragment: "", player: undefined, arena: undefined, playerId: 0, end: false, resOK: false };
 }
 
 export const UpdateState = {
@@ -1167,6 +1168,9 @@ export const UpdateState = {
     }
     if (message.end === true) {
       writer.uint32(80).bool(message.end);
+    }
+    if (message.resOK === true) {
+      writer.uint32(88).bool(message.resOK);
     }
     return writer;
   },
@@ -1213,6 +1217,13 @@ export const UpdateState = {
 
           message.end = reader.bool();
           continue;
+        case 11:
+          if (tag !== 88) {
+            break;
+          }
+
+          message.resOK = reader.bool();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1224,31 +1235,28 @@ export const UpdateState = {
 };
 
 function createBaseTableInfo(): TableInfo {
-  return { players: {}, tableId: "", tableState: 0, loseTeams: {}, waiter: undefined, countDown: 0, room: undefined };
+  return { tableId: "", tableState: 0, players: {}, loseTeams: {}, waiter: undefined, room: undefined };
 }
 
 export const TableInfo = {
   encode(message: TableInfo, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    Object.entries(message.players).forEach(([key, value]) => {
-      TableInfo_PlayersEntry.encode({ key: key as any, value }, writer.uint32(10).fork()).ldelim();
-    });
     if (message.tableId !== "") {
-      writer.uint32(18).string(message.tableId);
+      writer.uint32(10).string(message.tableId);
     }
     if (message.tableState !== 0) {
-      writer.uint32(24).int32(message.tableState);
+      writer.uint32(16).int32(message.tableState);
     }
+    Object.entries(message.players).forEach(([key, value]) => {
+      TableInfo_PlayersEntry.encode({ key: key as any, value }, writer.uint32(26).fork()).ldelim();
+    });
     Object.entries(message.loseTeams).forEach(([key, value]) => {
-      TableInfo_LoseTeamsEntry.encode({ key: key as any, value }, writer.uint32(42).fork()).ldelim();
+      TableInfo_LoseTeamsEntry.encode({ key: key as any, value }, writer.uint32(34).fork()).ldelim();
     });
     if (message.waiter !== undefined) {
-      TableInfo_Waiter.encode(message.waiter, writer.uint32(50).fork()).ldelim();
-    }
-    if (message.countDown !== 0) {
-      writer.uint32(56).int32(message.countDown);
+      TableInfo_Waiter.encode(message.waiter, writer.uint32(42).fork()).ldelim();
     }
     if (message.room !== undefined) {
-      Room.encode(message.room, writer.uint32(66).fork()).ldelim();
+      Room.encode(message.room, writer.uint32(50).fork()).ldelim();
     }
     return writer;
   },
@@ -1265,51 +1273,44 @@ export const TableInfo = {
             break;
           }
 
-          const entry1 = TableInfo_PlayersEntry.decode(reader, reader.uint32());
-          if (entry1.value !== undefined) {
-            message.players[entry1.key] = entry1.value;
-          }
-          continue;
-        case 2:
-          if (tag !== 18) {
-            break;
-          }
-
           message.tableId = reader.string();
           continue;
-        case 3:
-          if (tag !== 24) {
+        case 2:
+          if (tag !== 16) {
             break;
           }
 
           message.tableState = reader.int32() as any;
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          const entry3 = TableInfo_PlayersEntry.decode(reader, reader.uint32());
+          if (entry3.value !== undefined) {
+            message.players[entry3.key] = entry3.value;
+          }
+          continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          const entry4 = TableInfo_LoseTeamsEntry.decode(reader, reader.uint32());
+          if (entry4.value !== undefined) {
+            message.loseTeams[entry4.key] = entry4.value;
+          }
           continue;
         case 5:
           if (tag !== 42) {
             break;
           }
 
-          const entry5 = TableInfo_LoseTeamsEntry.decode(reader, reader.uint32());
-          if (entry5.value !== undefined) {
-            message.loseTeams[entry5.key] = entry5.value;
-          }
+          message.waiter = TableInfo_Waiter.decode(reader, reader.uint32());
           continue;
         case 6:
           if (tag !== 50) {
-            break;
-          }
-
-          message.waiter = TableInfo_Waiter.decode(reader, reader.uint32());
-          continue;
-        case 7:
-          if (tag !== 56) {
-            break;
-          }
-
-          message.countDown = reader.int32();
-          continue;
-        case 8:
-          if (tag !== 66) {
             break;
           }
 
@@ -1326,7 +1327,7 @@ export const TableInfo = {
 };
 
 function createBaseTableInfo_Player(): TableInfo_Player {
-  return { teamId: 0, state: undefined, end: false, score: 0, profile: undefined };
+  return { teamId: 0, state: undefined, end: false, score: 0, profile: undefined, resOK: false };
 }
 
 export const TableInfo_Player = {
@@ -1345,6 +1346,9 @@ export const TableInfo_Player = {
     }
     if (message.profile !== undefined) {
       Profile.encode(message.profile, writer.uint32(42).fork()).ldelim();
+    }
+    if (message.resOK === true) {
+      writer.uint32(48).bool(message.resOK);
     }
     return writer;
   },
@@ -1390,6 +1394,13 @@ export const TableInfo_Player = {
           }
 
           message.profile = Profile.decode(reader, reader.uint32());
+          continue;
+        case 6:
+          if (tag !== 48) {
+            break;
+          }
+
+          message.resOK = reader.bool();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {

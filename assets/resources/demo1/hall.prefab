@@ -100,7 +100,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -238.242,
+      "y": -284.75,
       "z": 0
     },
     "_lrot": {
@@ -271,7 +271,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -25.71,
+      "y": -48.64650000000001,
       "z": 0
     },
     "_lrot": {
@@ -323,7 +323,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -97.77734375,
+      "x": -76.416015625,
       "y": 0,
       "z": 0
     },
@@ -364,7 +364,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 311.4453125,
+      "width": 467.16796875,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -403,8 +403,8 @@
     "_string": "4444444448888888888888888888",
     "_horizontalAlign": 0,
     "_verticalAlign": 1,
-    "_actualFontSize": 20,
-    "_fontSize": 20,
+    "_actualFontSize": 30,
+    "_fontSize": 30,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
     "_overflow": 0,
@@ -502,7 +502,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 168.293,
+      "x": 234.847,
       "y": -1.661,
       "z": 0
     },
@@ -632,8 +632,8 @@
     "_string": "快速开始",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 20,
-    "_fontSize": 20,
+    "_actualFontSize": 25,
+    "_fontSize": 25,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
     "_overflow": 1,
@@ -679,7 +679,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 100,
+      "width": 120.168,
       "height": 43.39
     },
     "_anchorPoint": {
@@ -826,8 +826,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 567,
-      "height": 65
+      "width": 680,
+      "height": 87.248
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -928,7 +928,7 @@
     },
     "_type": 0,
     "_fillType": 0,
-    "_sizeMode": 1,
+    "_sizeMode": 0,
     "_fillCenter": {
       "__type__": "cc.Vec2",
       "x": 0,
@@ -943,7 +943,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "6cecsaZL1KPKxb8Ipbyu4Y"
+    "fileId": "2eJXKm+elLX67aqtFuRql6"
   },
   {
     "__type__": "cc.PrefabInfo",
@@ -972,7 +972,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 600,
+      "width": 690,
       "height": 1000
     },
     "_anchorPoint": {
@@ -1013,7 +1013,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 600,
+      "width": 690,
       "height": 1000
     },
     "_anchorPoint": {
@@ -1122,7 +1122,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 600,
+      "width": 700,
       "height": 1000
     },
     "_anchorPoint": {

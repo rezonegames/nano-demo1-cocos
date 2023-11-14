@@ -59,6 +59,10 @@ export class tetris extends Component {
     // tetris属性
     config: { id: number, my: boolean, w: number, h: number, bw: number, bh: number, draw0: boolean }
 
+    //
+    // 资源是否都初始化完成
+    isInit: boolean
+
     onAdded(args) {
         //
         // 创建
@@ -79,17 +83,11 @@ export class tetris extends Component {
         this.player = new Player(this.arena, this.config.id);
 
         //
-        // 玩家自己随机生成方块
-        if (this.config.my) {
-            this.player.reset();
-        }
-
-        //
         // 玩家的所有事件
-        ['pos', 'end', 'matrix'].forEach(key => {
+        ['pos', 'end', 'matrix', 'score'].forEach(key => {
             //
             this.player.events.on(key, (val) => {
-                oops.log.logView(key, "player state");
+                // oops.log.logView(key, "player state");
 
                 gamechannel.gameNotify("r.updatestate", this.serialize("player", key, val));
                 if (key !== "score") {
@@ -132,7 +130,8 @@ export class tetris extends Component {
             arena: undefined, player: undefined,
             fragment: fragment,
             playerId: this.player.id,
-            end: this.player.end
+            end: this.player.end,
+            resOK: false,
         }
 
         switch (fragment) {
@@ -153,6 +152,9 @@ export class tetris extends Component {
                         break
                     case "end":
                         msg.end = true;
+                    case "res":
+                        msg.resOK = true;
+                        break
                 }
                 msg.player = player;
                 break
@@ -188,7 +190,7 @@ export class tetris extends Component {
             return pmatrix;
         }
 
-        // oops.log.logView(state, `unserialize ${this.player.id}`);
+        oops.log.logView(state, `unserialize ${this.player.id}`);
         //
         // arena区域
         let arena: ProtoArena = state.arena;
@@ -206,13 +208,14 @@ export class tetris extends Component {
                 this.player.matrix = convMatrix(player.matrix);
             }
             if (player.score != 0) {
-                this.updateScore(this.player.score);
+                this.updateScore(player.score);
             }
         }
         this.draw();
     }
 
     updateScore(score: number) {
+        // oops.log.logView(score, "score");
         this.score.string = `分数：${score}`;
     }
 
@@ -228,14 +231,11 @@ export class tetris extends Component {
                 this.itemArray[y][x] = item;
             })
         })
-        //
-        // 设置初始分数
-        this.updateScore(0);
-
-        this.draw();
+        gamechannel.gameNotify("r.updatestate", this.serialize("player", "res", null));
     }
 
     draw() {
+        if (!this.isInit) return;
         if (this.config.draw0) {
             this.fill0(this.arena.matrix);
         } else {
@@ -244,6 +244,13 @@ export class tetris extends Component {
         this.drawMatrix(this.arena.matrix, {x: 0, y: 0});
         if(this.player.matrix) {
             this.drawMatrix(this.player.matrix, this.player.pos);
+        }
+    }
+
+    update(deltaTime: number) {
+        if (!this.isInit) return;
+        if (this.config.my) {
+            this.player.update(deltaTime);
         }
     }
 
@@ -267,6 +274,11 @@ export class tetris extends Component {
         matrix.forEach((row, y) => {
             row.forEach((value, x) => {
                 if (value != 0) {
+                    const [oy, ox] = [y + offset.y, x + offset.x];
+                    // oops.log.logView({oy, ox}, "drawMatrix pos");
+                    if (oy > this.config.h || oy < 0 || ox > this.config.w || ox < 0) {
+                        return;
+                    }
                     this.itemArray[y + offset.y][x + offset.x].getComponent(Sprite).spriteFrame = this.spriteArray[value];
                 }
 
@@ -274,10 +286,5 @@ export class tetris extends Component {
         });
     }
 
-    update(deltaTime: number) {
-        if (this.config.my) {
-            this.player.update(deltaTime);
-        }
-    }
 }
 
