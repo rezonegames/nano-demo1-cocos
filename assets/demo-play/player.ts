@@ -5,7 +5,7 @@ export class Player {
 
     //
     // 位置
-    pos: {x:number, y:number}
+    pos: { x: number, y: number }
 
     //
     // 方块形状及位置
@@ -43,7 +43,7 @@ export class Player {
     end: boolean
 
     constructor(arena: Arena, id: number) {
-        this.pos = {x:0, y:0};
+        this.pos = {x: 0, y: 0};
         this.score = 0;
         this.dropCounter = 0;
         this.dropInterval = this.DROP_SLOW;
@@ -52,8 +52,7 @@ export class Player {
         this.end = false;
     }
 
-    createPiece(type)
-    {
+    createPiece(type) {
         if (type === 'T') {
             return [
                 [0, 0, 0],
@@ -99,8 +98,8 @@ export class Player {
         }
     }
 
-    drop()
-    {
+    drop() {
+        if (this.end) return;
         this.pos.y++;
         this.dropCounter = 0;
         if (this.arena.collide(this)) {
@@ -114,8 +113,8 @@ export class Player {
         this.events.emit('pos', this.pos);
     }
 
-    dropDown()
-    {
+    dropDown() {
+        if (this.end) return;
         console.log("dropdown")
         while (true) {
             this.pos.y++;
@@ -133,8 +132,8 @@ export class Player {
     }
 
 
-    move(dir)
-    {
+    move(dir) {
+        if (this.end) return;
         this.pos.x += dir;
         if (this.arena.collide(this)) {
             this.pos.x -= dir;
@@ -143,8 +142,7 @@ export class Player {
         this.events.emit('pos', this.pos);
     }
 
-    reset()
-    {
+    reset() {
         const pieces = 'ILJOTSZ';
         this.matrix = this.createPiece(pieces[pieces.length * Math.random() | 0]);
         this.pos.y = 0;
@@ -161,8 +159,8 @@ export class Player {
         this.events.emit('matrix', this.matrix);
     }
 
-    rotate(dir)
-    {
+    rotate(dir) {
+        if (this.end) return;
         const pos = this.pos.x;
         let offset = 1;
         this._rotateMatrix(this.matrix, dir);
@@ -178,8 +176,8 @@ export class Player {
         this.events.emit('matrix', this.matrix);
     }
 
-    _rotateMatrix(matrix, dir)
-    {
+    _rotateMatrix(matrix, dir) {
+        if (this.end) return;
         for (let y = 0; y < matrix.length; ++y) {
             for (let x = 0; x < y; ++x) {
                 [
@@ -199,11 +197,8 @@ export class Player {
         }
     }
 
-    update(deltaTime)
-    {
-        if(this.end) {
-            return;
-        }
+    update(deltaTime) {
+        if (this.end) return;
         this.dropCounter += deltaTime;
         if (this.dropCounter > this.dropInterval) {
             this.drop();

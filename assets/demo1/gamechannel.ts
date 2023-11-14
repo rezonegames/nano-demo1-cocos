@@ -14,7 +14,7 @@ import {GameEvent} from "db://assets/script/game/common/config/GameEvent";
 import Protocol from "db://assets/demo1/nano/protocol";
 import {IPackage, Package} from "db://assets/demo1/nano/package";
 import {UIID} from "db://assets/script/game/common/config/GameUIConfig";
-import {GameStateResp, LoginToGame, LoginToGameResp} from "db://assets/demo1/proto/client";
+import {GameStateResp, LoginToGame, LoginToGameResp, UpdateState} from "db://assets/demo1/proto/client";
 import {GameState, TableState} from "db://assets/demo1/proto/consts";
 import {ErrorCode} from "db://assets/demo1/proto/error";
 
@@ -66,8 +66,7 @@ const route2cmd = (route: string): number => {
     let v: any = {
         "onState": 100,
         "onCountDown": 101,
-        "onStateUpdate": 102,
-        "onTeamLose": 103,
+        "onPlayerUpdate": 102,
     }
     return v[route];
 };
@@ -272,6 +271,14 @@ export class NetChannelManager {
                     oops.message.dispatchEvent(GameEvent.TableEvent, resp);
                     break;
             }
+        }, this);
+
+        //
+        // 游戏内状态同步
+        this.gameAddListener("onPlayerUpdate", (cmd, data: any) => {
+            let resp = UpdateState.decode(new Uint8Array(data.body));
+            // oops.log.logNet(resp, "onPlayerUpdate");
+            oops.message.dispatchEvent(GameEvent.PlayerUpdateEvent, resp);
         }, this);
     }
 

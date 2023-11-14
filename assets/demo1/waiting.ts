@@ -52,11 +52,11 @@ export class waiting extends Component {
 
     start() {
         this.viewToWait();
-        oops.message.on(GameEvent.TableEvent, this.onUpdatePlayerState, this);
+        oops.message.on(GameEvent.TableEvent, this.onState, this);
     }
 
     protected onDestroy() {
-        oops.message.off(GameEvent.TableEvent, this.onUpdatePlayerState, this);
+        oops.message.off(GameEvent.TableEvent, this.onState, this);
     }
 
     public onBtnCancel() {
@@ -83,7 +83,7 @@ export class waiting extends Component {
         gamechannel.gameReqest("r.ready", buf, respObject);
     }
 
-    public onUpdatePlayerState(event: string, args: any) {
+    public onState(event: string, args: any) {
         let gameState = args as GameStateResp;
 
         switch (gameState.state) {

@@ -15,4 +15,8 @@ export enum GameEvent {
     //
     // table事件
     TableEvent = "TableEvent",
+
+    //
+    // 玩家事件
+    PlayerUpdateEvent = "PlayerUpdateEvent"
 }

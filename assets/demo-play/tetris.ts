@@ -57,10 +57,9 @@ export class tetris extends Component {
 
     //
     // tetris属性
-    config: { my: boolean, w: number, h: number, bw: number, bh: number, draw0: boolean }
+    config: { id: number, my: boolean, w: number, h: number, bw: number, bh: number, draw0: boolean }
 
     onAdded(args) {
-        let uid = oops.storage.getUser();
         //
         // 创建
         oops.log.logView(args, "创建游戏");
@@ -77,11 +76,11 @@ export class tetris extends Component {
         };
 
         this.arena = new Arena(this.config.w, this.config.h);
-        this.player = new Player(this.arena, uid);
+        this.player = new Player(this.arena, this.config.id);
 
         //
         // 玩家自己随机生成方块
-        if(this.config.my) {
+        if (this.config.my) {
             this.player.reset();
         }
 
@@ -90,6 +89,8 @@ export class tetris extends Component {
         ['pos', 'end', 'matrix'].forEach(key => {
             //
             this.player.events.on(key, (val) => {
+                oops.log.logView(key, "player state");
+
                 gamechannel.gameNotify("r.updatestate", this.serialize("player", key, val));
                 if (key !== "score") {
                     this.draw();
@@ -117,7 +118,7 @@ export class tetris extends Component {
         //
         // 转为protobuf
         const convMatrix = (matrix: Array<number>[]): Array2 => {
-            if(!matrix) {
+            if (!matrix) {
                 return undefined;
             }
             let pmatrix: Array2 = {rows: []};
@@ -127,7 +128,7 @@ export class tetris extends Component {
             return pmatrix;
         }
 
-        let msg:UpdateState = {
+        let msg: UpdateState = {
             arena: undefined, player: undefined,
             fragment: fragment,
             playerId: this.player.id,
@@ -150,6 +151,8 @@ export class tetris extends Component {
                     case "score":
                         player.score = val;
                         break
+                    case "end":
+                        msg.end = true;
                 }
                 msg.player = player;
                 break
@@ -175,7 +178,7 @@ export class tetris extends Component {
         //
         // proto 到 二维数组
         const convMatrix = (matrix: Array2): Array<number>[] => {
-            if(!matrix) {
+            if (!matrix) {
                 return undefined;
             }
             let pmatrix: Array<number>[] = [];
@@ -185,31 +188,31 @@ export class tetris extends Component {
             return pmatrix;
         }
 
-        oops.log.logView(state, `unserialize ${this.player.id}`);
+        // oops.log.logView(state, `unserialize ${this.player.id}`);
         //
         // arena区域
-        let arena:ProtoArena = state.arena;
-        if(arena) {
+        let arena: ProtoArena = state.arena;
+        if (arena) {
             this.arena.matrix = convMatrix(arena.matrix);
         }
         //
         // player
-        let player:ProtoPlayer = state.player;
-        if(player) {
-            if(player.pos) {
+        let player: ProtoPlayer = state.player;
+        if (player) {
+            if (player.pos) {
                 this.player.pos = player.pos;
             }
-            if(player.matrix) {
+            if (player.matrix) {
                 this.player.matrix = convMatrix(player.matrix);
             }
-            if(player.score != 0) {
+            if (player.score != 0) {
                 this.updateScore(this.player.score);
             }
         }
         this.draw();
     }
 
-    updateScore(score:number) {
+    updateScore(score: number) {
         this.score.string = `分数：${score}`;
     }
 
@@ -239,7 +242,9 @@ export class tetris extends Component {
             this.fillNull(this.arena.matrix);
         }
         this.drawMatrix(this.arena.matrix, {x: 0, y: 0});
-        this.drawMatrix(this.player.matrix, this.player.pos);
+        if(this.player.matrix) {
+            this.drawMatrix(this.player.matrix, this.player.pos);
+        }
     }
 
     fill0(matrix) {

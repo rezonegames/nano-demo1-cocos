@@ -1,7 +1,7 @@
 import {_decorator, Component, Node, Label, Prefab, instantiate, Layout} from 'cc';
 import {oops} from "db://oops-framework/core/Oops";
 import {GameEvent} from "db://assets/script/game/common/config/GameEvent";
-import {GameStateResp, Room, TableInfo, TableInfo_Player} from "db://assets/demo1/proto/client";
+import {GameStateResp, Room, TableInfo, TableInfo_Player, UpdateState} from "db://assets/demo1/proto/client";
 import {TableState} from "db://assets/demo1/proto/consts";
 import {UIID} from "db://assets/script/game/common/config/GameUIConfig";
 import {Player} from "db://assets/demo-play/player";
@@ -39,14 +39,25 @@ export class game extends Component {
     start() {
         this.title.string = "";
         oops.message.on(GameEvent.TableEvent, this.onTableInfo, this);
+        oops.message.on(GameEvent.PlayerUpdateEvent, this.onPlayerUpdate, this);
     }
 
     protected onDestroy() {
         oops.message.off(GameEvent.TableEvent, this.onTableInfo, this);
+        oops.message.off(GameEvent.PlayerUpdateEvent, this.onPlayerUpdate, this);
     }
 
     update(deltaTime: number) {
 
+    }
+
+    onPlayerUpdate(event: string, args: any) {
+        let state: UpdateState = args as UpdateState;
+        let t: tetris = this.tetrisManager[state.playerId];
+        if (!t || state.playerId == this.myPlayer.id) {
+            return;
+        }
+        t.unserialize(state);
     }
 
     onTableInfo(event: string, args: any) {
@@ -75,16 +86,16 @@ export class game extends Component {
                                 // 创建tetirs
                                 for (const [k, v] of Object.entries(this.tableInfo.players)) {
                                     let isMy: boolean = parseInt(k) == oops.storage.getUser();
-                                    let player: Player;
+                                    let t: tetris;
                                     if (isMy) {
                                         let my: Node = parent.getChildByName("my");
-                                        player = this.createTetris({my: isMy, draw0: true}, my);
-                                        this.myPlayer = player;
+                                        t = this.createTetris({id: k, my: isMy, draw0: true}, my);
+                                        this.myPlayer = t.player;
                                     } else {
                                         let enemy: Node = parent.getChildByName("enemy");
-                                        player = this.createTetris({my: isMy, draw0: true}, enemy);
+                                        t = this.createTetris({id: k, my: isMy, draw0: true}, enemy);
                                     }
-                                    this.tetrisManager[k] = player;
+                                    this.tetrisManager[k] = t;
                                 }
 
                             });
@@ -102,12 +113,12 @@ export class game extends Component {
         }
     }
 
-    createTetris(config: any, parent: Node): Player {
+    createTetris(config: any, parent: Node): tetris {
         let node: Node = instantiate(this.tetris);
         let t: tetris = node.getComponent("tetris") as tetris;
         t.onAdded(config);
         parent.addChild(node);
-        return t.player;
+        return t;
     }
 
     onLeft() {
