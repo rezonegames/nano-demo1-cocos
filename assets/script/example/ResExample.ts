@@ -4,8 +4,8 @@ import { VideoPlayer } from "cc";
 import { sp } from "cc";
 import { SpriteFrame } from "cc";
 import { Component, Node, Label, Asset, Prefab, _decorator, instantiate, resources } from "cc";
-import { resLoader } from "../res/ResLoader";
 import { Texture2D } from "cc";
+import {resLoader} from "db://assets/Script/core/res/ResLoader";
 
 const { ccclass, property } = _decorator;
 

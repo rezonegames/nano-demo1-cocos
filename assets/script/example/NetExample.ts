@@ -1,8 +1,8 @@
-import { WebSock } from "../network/WebSock";
-import { NetManager } from "../network/NetManager";
-import { NetNode } from "../network/NetNode";
-import { DefStringProtocol, NetData, INetworkTips } from "../network/NetInterface";
 import { Component, Label, _decorator, view, director, Node, RichText } from "cc";
+import {DefStringProtocol, INetworkTips, NetData} from "db://assets/Script/core/network/NetInterface";
+import {NetNode} from "db://assets/Script/core/network/NetNode";
+import {WebSock} from "db://assets/Script/core/network/WebSock";
+import {NetManager} from "db://assets/Script/core/network/NetManager";
 
 const { ccclass, property } = _decorator;
 

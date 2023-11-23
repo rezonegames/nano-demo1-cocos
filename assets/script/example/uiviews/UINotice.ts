@@ -1,5 +1,5 @@
 import { _decorator } from "cc";
-import { UIView } from "../../ui/UIView";
+import {UIView} from "db://assets/Script/core/ui/UIView";
 
 const {ccclass} = _decorator;
 

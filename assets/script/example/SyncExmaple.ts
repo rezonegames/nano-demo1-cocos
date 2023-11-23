@@ -1,6 +1,6 @@
 import { Component, _decorator, Node, tween, randomRange, Vec3, ModelComponent, Color } from "cc";
-import { getReplicateMark, ReplicatedOption } from "../sync/ReplicateMark";
-import { getReplicator } from "../sync/SyncUtil";
+import {getReplicateMark, ReplicatedOption} from "db://assets/Script/core/sync/ReplicateMark";
+import {getReplicator} from "db://assets/Script/core/sync/SyncUtil";
 
 const { ccclass, property } = _decorator;
 

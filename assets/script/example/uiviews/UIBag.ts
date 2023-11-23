@@ -1,8 +1,8 @@
-import { UIView } from "../../ui/UIView";
-import { uiManager } from "../../ui/UIManager";
 import { _decorator } from "cc";
 import { SpriteFrame } from "cc";
 import { Sprite, Node } from "cc";
+import {UIView} from "db://assets/Script/core/ui/UIView";
+import {uiManager} from "db://assets/Script/core/ui/UIManager";
 
 // Learn TypeScript:
 //  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/typescript.html

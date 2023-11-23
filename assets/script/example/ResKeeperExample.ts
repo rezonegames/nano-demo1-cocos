@@ -2,10 +2,10 @@ import { assetManager } from "cc";
 import { SpriteFrame } from "cc";
 import { Sprite } from "cc";
 import { director, _decorator, Component, Label, Node, Prefab } from "cc";
-import { ResLeakChecker } from "../res/ResLeakChecker";
-import { resLoader } from "../res/ResLoader";
-import { ResUtil } from "../res/ResUtil";
 import { CCBoolean } from "cc";
+import {ResLeakChecker} from "db://assets/Script/core/res/ResLeakChecker";
+import {resLoader} from "db://assets/Script/core/res/ResLoader";
+import {ResUtil} from "db://assets/Script/core/res/ResUtil";
 
 const { ccclass, property } = _decorator;
 

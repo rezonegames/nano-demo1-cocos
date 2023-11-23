@@ -1,26 +1,18 @@
-import { UIView } from "../../ui/UIView";
-import { uiManager } from "../../ui/UIManager";
 import { UIID } from "../UIExample";
 import { Sprite, _decorator } from "cc";
 import { SpriteFrame } from "cc";
+import {UIView} from "db://assets/Script/core/ui/UIView";
+import {Room} from "db://assets/Script/example/proto/client";
 
 const {ccclass, property} = _decorator;
 
 @ccclass
 export default class UIHall extends UIView {
 
-    @property({type : Sprite})
-    weapon: Sprite | null = null;
-
-    public onBag() {
-        uiManager.open(UIID.UIBag);
+    public onOpen(fromUI: number, ...args : any): void {
+        let roomList = args as Room[];
     }
 
-    public onNotice() {
-        uiManager.open(UIID.UINotice);
-    }
 
-    public onTop(preID: number, item: SpriteFrame) {
-        this.weapon!.spriteFrame = item;
-    }
+
 }

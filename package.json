@@ -9,6 +9,9 @@
   "dependencies": {
     "@types/ws": "^8.5.3",
     "http": "^0.0.1-security",
-    "ws": "^8.8.1"
+    "ws": "^8.8.1",
+    "protobufjs": "^7.2.5",
+    "long": "^5.2.3",
+    "crypto-es": "^2.1.0"
   }
 }
