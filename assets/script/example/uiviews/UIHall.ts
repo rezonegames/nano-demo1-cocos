@@ -13,6 +13,4 @@ export default class UIHall extends UIView {
         let roomList = args as Room[];
     }
 
-
-
 }

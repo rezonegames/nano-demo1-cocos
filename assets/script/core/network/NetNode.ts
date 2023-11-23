@@ -164,7 +164,7 @@ export class NetNode {
         this.resetHearbeatTimer();
         // 触发消息执行
         let rspCmd = this._protocolHelper!.getPackageId(msg);
-        console.log(`NetNode onMessage rspCmd = ` + rspCmd);
+        // console.log(`NetNode onMessage rspCmd = ` + rspCmd);
         // 优先触发request队列
         if (this._requests.length > 0) {
             for (let reqIdx in this._requests) {
@@ -185,7 +185,7 @@ export class NetNode {
         let listeners = this._listener[rspCmd];
         if (null != listeners) {
             for (const rsp of listeners) {
-                console.log(`NetNode execute listener cmd ${rspCmd}`);
+                // console.log(`NetNode execute listener cmd ${rspCmd}`);
                 this._callbackExecuter!(rsp, msg);
             }
         }
@@ -246,7 +246,7 @@ export class NetNode {
     // 发起请求，如果当前处于重连中，进入缓存列表等待重连完成后发送
     public send(buf: NetData, force: boolean = false): number {
         if (this._state == NetNodeState.Working || force) {
-            console.log(`socket send ...`);
+            // console.log(`socket send ...`);
             return this._socket!.send(buf);
         } else if (this._state == NetNodeState.Checking ||
             this._state == NetNodeState.Connecting) {

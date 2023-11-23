@@ -30,6 +30,7 @@ export let UICF: { [key: number]: UIConf } = {
     [UIID.UILogin]: {prefab: "Prefab/Login"},
     [UIID.UIHall]: {prefab: "Prefab/Hall"},
     [UIID.UIHeader]: {prefab: "Prefab/Header"},
+    [UIID.UIRegister]: {prefab: "Prefab/Register"},
 }
 
 @ccclass

@@ -44,8 +44,13 @@ export default class UILogin extends UIView {
         let buf = AccountLoginReq.encode({partition: accountType, accountId: accountId}).finish();
         let complete = (response: any) => {
             let resp = AccountLoginResp.decode(response);
+            oo.log.logNet(resp, "登录");
             if (resp.code == ErrorCode.OK) {
                 this.setConnect(resp);
+                // 账号基本信息保存在本地
+                oo.storage.setUser(resp.userId);
+                oo.storage.set("accountId", accountId);
+                oo.storage.set("adder", resp.addr);
             }
         }
         oo.http.postProtoBufParam("/v1/login", buf, complete);
