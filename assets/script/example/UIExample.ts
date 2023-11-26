@@ -31,6 +31,7 @@ export let UICF: { [key: number]: UIConf } = {
     [UIID.UIHall]: {prefab: "Prefab/Hall"},
     [UIID.UIHeader]: {prefab: "Prefab/Header"},
     [UIID.UIRegister]: {prefab: "Prefab/Register"},
+    [UIID.UIWaiting]: {prefab: "Prefab/Waiting"},
 }
 
 @ccclass
@@ -44,6 +45,7 @@ export default class UIExample extends Component {
     start() {
         uiManager.initUIConf(UICF);
         uiManager.open(UIID.UILogin);
+        // uiManager.open(UIID.UIHeader);
     }
 
     update(dt) {
