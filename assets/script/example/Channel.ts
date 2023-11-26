@@ -17,6 +17,7 @@ import {Label, view, director, Node} from "cc";
 import {GameState, TableState} from "db://assets/Script/example/proto/consts";
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
 import {UIID} from "db://assets/Script/example/UIExample";
+import {EventMgr} from "db://assets/Script/core/common/EventManager";
 
 enum NetChannelType {
     /** 游戏服务器 */
@@ -257,12 +258,16 @@ export class NetChannelManager {
                     switch (tableInfo.tableState) {
                         case TableState.CHECK_RES:
                             break
+                        case TableState.GAMING:
+                            uiManager.open(UIID.UIControl, tableInfo);
+                            break;
                     }
                     break
 
                 case GameState.WAIT:
                     break;
             }
+            EventMgr.raiseEvent("onState", resp);
         }, this);
 
         // 游戏内状态同步

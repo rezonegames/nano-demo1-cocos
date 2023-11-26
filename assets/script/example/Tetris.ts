@@ -1,4 +1,4 @@
-import {_decorator, Component, instantiate, Label, Layout, Node, Prefab, Sprite, SpriteFrame} from 'cc';
+import {_decorator, Component, instantiate, Label, Widget, Node, Prefab, Sprite, SpriteFrame} from 'cc';
 import {Arena} from "db://assets/Script/example/Arena";
 import {Player} from "db://assets/Script/example/Player";
 import {Action, OnFrame_Player, UpdateFrame} from "db://assets/Script/example/proto/client";
@@ -11,11 +11,11 @@ export class Tetris extends Component {
 
     // 方块
     @property(Prefab)
-    block: Prefab = undefined
+    block: Prefab
 
     // 图片
     @property([SpriteFrame])
-    spriteArray: SpriteFrame[] = [];
+    spriteArray: SpriteFrame[]
 
     // canvas
     @property(Node)
@@ -26,8 +26,8 @@ export class Tetris extends Component {
     itemArray: Node[][] = [];
 
     // top
-    @property(Layout)
-    top: Layout
+    @property(Widget)
+    top: Widget
 
     // 区域
     arena: Arena
@@ -116,13 +116,13 @@ export class Tetris extends Component {
 
     start() {
         const matrix = this.arena.matrix;
-        const [w, h] = [this.config.w * this.config.bw, this.config.h * this.config.bh];
+        const [w, h, bw, bh] = [this.config.w * this.config.bw, this.config.h * this.config.bh, this.config.bw, this.config.bh];
         matrix.forEach((row, y) => {
             this.itemArray[y] = []
             row.forEach((value, x) => {
                 let item: Node = instantiate(this.block);
                 this.canvas.addChild(item);
-                item.setPosition(-w / 2 + x * this.config.bw, h / 2 - (y + 1) * this.config.bh);
+                item.setPosition(-w / 2 + x * bw + bw/2, h / 2 - (y + 1) * this.config.bh + bh/2);
                 this.itemArray[y][x] = item;
             })
         })
@@ -139,7 +139,7 @@ export class Tetris extends Component {
     }
 
     update(deltaTime: number) {
-        this.player.update(deltaTime);
+        // this.player.update(deltaTime);
     }
 
     fill0(matrix) {

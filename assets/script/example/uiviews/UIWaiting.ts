@@ -6,8 +6,9 @@ import {Cancel, CancelResp, GameStateResp, Room, TableInfo_Player} from "db://as
 import {CallbackObject} from "db://assets/Script/core/network/NetInterface";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
-import {channel} from "db://assets/Script/example/GameChannel";
+import {channel} from "db://assets/Script/example/Channel";
 import {GameState, TableState} from "db://assets/Script/example/proto/consts";
+import {EventMgr} from "db://assets/Script/core/common/EventManager";
 
 // Learn TypeScript:
 //  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/typescript.html
@@ -43,10 +44,16 @@ export default class UIWaiting extends UIView {
     private oldReadyList: { [key: number]: number } = {};
 
 
-    public onOpen(fromUI: number, ...args : any): void {
+    public onOpen(fromUI: number, ...args: any): void {
+        EventMgr.addEventListener("onState", this.onState, this);
         let room = args[0] as Room;
         this.title.string = `房间信息：名字：${room.name} 房间ID：${room.roomId}`;
         this.clear();
+    }
+
+    onDestroy() {
+        super.onDestroy();
+        EventMgr.removeEventListener("onState", this.onState, this);
     }
 
     clear() {
@@ -84,11 +91,11 @@ export default class UIWaiting extends UIView {
                         }
 
                         // 更新list
-                        if(Object.keys(readys).length !=0 && Object.keys(readys).length == Object.keys(this.oldReadyList).length) {
+                        if (Object.keys(readys).length != 0 && Object.keys(readys).length == Object.keys(this.oldReadyList).length) {
                             return;
                         }
                         let profiles: TableInfo_Player[] = [];
-                        for(const k in tableInfo.players) {
+                        for (const k in tableInfo.players) {
                             let p = tableInfo.players[k];
                             profiles.push(p);
                         }
@@ -106,7 +113,7 @@ export default class UIWaiting extends UIView {
     }
 
     // 更新列表
-    updateWaitView(profiles:TableInfo_Player[], readys: { [key: number]: number }) {
+    updateWaitView(profiles: TableInfo_Player[], readys: { [key: number]: number }) {
         this.listView.setDelegate({
             items: () => profiles,
             reuse: (itemNode: Node, item: TableInfo_Player) => {

@@ -1,7 +1,7 @@
 import {Component, _decorator} from "cc";
 import {UIConf, uiManager} from "db://assets/Script/core/ui/UIManager";
 import {oo} from "db://assets/Script/core/oo";
-import {channel} from "db://assets/Script/example/GameChannel";
+import {channel} from "db://assets/Script/example/Channel";
 
 // Learn TypeScript:
 //  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/typescript.html
@@ -22,7 +22,7 @@ export enum UIID {
     UIHall,
     UINotice,
     UIWaiting,
-    UIGame,
+    UIControl,
     UISettlement
 }
 
@@ -32,6 +32,8 @@ export let UICF: { [key: number]: UIConf } = {
     [UIID.UIHeader]: {prefab: "Prefab/Header"},
     [UIID.UIRegister]: {prefab: "Prefab/Register"},
     [UIID.UIWaiting]: {prefab: "Prefab/Waiting"},
+    [UIID.UIControl]: {prefab: "Prefab/Control"},
+    [UIID.UISettlement]: {prefab: "Prefab/Settlement"},
 }
 
 @ccclass

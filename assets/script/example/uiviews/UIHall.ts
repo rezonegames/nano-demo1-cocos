@@ -7,7 +7,7 @@ import {oo} from "db://assets/Script/core/oo";
 import {ListView} from "db://assets/Script/core/components/scrollview/ListView";
 import {CallbackObject} from "db://assets/Script/core/network/NetInterface";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
-import {channel} from "db://assets/Script/example/GameChannel";
+import {channel} from "db://assets/Script/example/Channel";
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
 
 const {ccclass, property} = _decorator;
