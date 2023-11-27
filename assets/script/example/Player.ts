@@ -6,39 +6,35 @@ export class Player {
 
     // 位置
     pos: { x: number, y: number }
-
     // 方块形状及位置
     matrix: Array<number>[]
-
     // 分数
     score: number
-
     // arena
     arena: Arena
-
     // 时间计数器
     dropCounter: any
-
     // 下降速度，todo：可以设置
     dropInterval: number
-
     DROP_SLOW = 1
     DROP_FAST = 0.05
 
-    // id
-    id: number
-
-    //
+    uid: number
     // 事件
     events = new EventTarget;
 
-    constructor(arena: Arena, id: number) {
+    // 在第1帧的时候初始化
+    pieceList: number[]
+    index: number;
+
+    constructor(arena: Arena, uid: number) {
         this.pos = {x: 0, y: 0};
         this.score = 0;
         this.dropCounter = 0;
         this.dropInterval = this.DROP_SLOW;
         this.arena = arena;
-        this.id = id;
+        this.uid = uid;
+        this.index = 0;
     }
 
     createPiece(type) {
@@ -102,7 +98,7 @@ export class Player {
     }
 
     dropDown() {
-        console.log("dropdown")
+        // console.log("dropdown");
         while (true) {
             this.pos.y++;
             this.dropCounter = 0;
@@ -129,7 +125,11 @@ export class Player {
 
     reset() {
         const pieces = 'ILJOTSZ';
-        this.matrix = this.createPiece(pieces[oo.random.getRandomInt(0, pieces.length)]);
+        this.matrix = this.createPiece(pieces[this.pieceList[this.index]]);
+        this.index++;
+        if(this.index > this.pieceList.length -1) {
+            this.index = 0;
+        }
         this.pos.y = 0;
         this.pos.x = (this.arena.matrix[0].length / 2 | 0) -
             (this.matrix[0].length / 2 | 0);

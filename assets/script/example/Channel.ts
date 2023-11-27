@@ -257,9 +257,11 @@ export class NetChannelManager {
                     let tableInfo = resp.tableInfo;
                     switch (tableInfo.tableState) {
                         case TableState.CHECK_RES:
+                            if (!uiManager.isTopUI(UIID.UIControl)) {
+                                uiManager.open(UIID.UIControl, tableInfo);
+                            }
                             break
                         case TableState.GAMING:
-                            uiManager.open(UIID.UIControl, tableInfo);
                             break;
                     }
                     break
@@ -273,6 +275,7 @@ export class NetChannelManager {
         // 游戏内状态同步
         this.gameAddListener("onFrame", (cmd, data: any) => {
             let resp = OnFrame.decode(new Uint8Array(data.body));
+            EventMgr.raiseEvent("onFrame", resp);
         }, this);
     }
 

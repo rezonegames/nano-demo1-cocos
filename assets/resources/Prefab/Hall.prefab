@@ -782,7 +782,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -103.29499999999999,
+      "x": -88.29499999999999,
       "y": 0,
       "z": 0
     },
@@ -858,7 +858,7 @@
       "a": 255
     },
     "_string": "房间信息kkkkkaksdadsfsdkfksfjskdfsjfks",
-    "_horizontalAlign": 1,
+    "_horizontalAlign": 0,
     "_verticalAlign": 1,
     "_actualFontSize": 20,
     "_fontSize": 20,
@@ -960,7 +960,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 230,
+      "x": 215,
       "y": 0,
       "z": 0
     },
@@ -1134,7 +1134,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 100,
-      "height": 80
+      "height": 60
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -1321,8 +1321,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 560,
-      "height": 100
+      "width": 530,
+      "height": 80
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -2072,7 +2072,7 @@
       "b": 0,
       "a": 255
     },
-    "_string": "邮件",
+    "_string": "观战",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
     "_actualFontSize": 20,

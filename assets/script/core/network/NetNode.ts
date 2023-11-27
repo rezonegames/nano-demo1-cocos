@@ -170,13 +170,13 @@ export class NetNode {
             for (let reqIdx in this._requests) {
                 let req = this._requests[reqIdx];
                 if (req.rspCmd == rspCmd && req.rspObject) {
-                    console.log(`NetNode execute request rspcmd ${rspCmd}`);
+                    // console.log(`NetNode execute request rspcmd ${rspCmd}`);
                     this._callbackExecuter!(req.rspObject, msg);
                     this._requests.splice(parseInt(reqIdx), 1);
                     break;
                 }
             }
-            console.log(`NetNode still has ${this._requests.length} request watting`);
+            // console.log(`NetNode still has ${this._requests.length} request watting`);
             if (this._requests.length == 0) {
                 this.updateNetTips(NetTipsType.Requesting, false);
             }
@@ -268,7 +268,7 @@ export class NetNode {
         if (this._state == NetNodeState.Working || force) {
             this._socket!.send(buf);
         }
-        console.log(`NetNode request with timeout for ${rspCmd}`);
+        // console.log(`NetNode request with timeout for ${rspCmd}`);
         // 进入发送缓存列表
         this._requests.push({
             buffer: buf, rspCmd, rspObject
@@ -366,7 +366,7 @@ export class NetNode {
         }
 
         this._keepAliveTimer = setTimeout(() => {
-            console.log("NetNode keepAliveTimer send Hearbeat")
+            // console.log("NetNode keepAliveTimer send Hearbeat")
             this.send(this._protocolHelper!.getHearbeat());
         }, this._heartTime);
     }

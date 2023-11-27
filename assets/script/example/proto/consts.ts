@@ -47,13 +47,12 @@ export enum TableType {
 
 export enum ActionType {
   ACTIONTYPE_NONE = 0,
-  MOVE = 1,
-  ROTATE = 2,
-  DROP = 3,
-  /** QUICK_DROP - 快速下降 */
-  QUICK_DROP = 4,
-  /** ITEM_USE - 道具 */
-  ITEM_USE = 5,
+  FRAME_ONE = 1,
+  MOVE = 2,
+  ROTATE = 3,
+  DROP = 4,
+  QUICK_DROP = 5,
+  ITEM_USE = 6,
   END = 100,
   UNRECOGNIZED = -1,
 }

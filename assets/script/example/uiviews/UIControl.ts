@@ -1,9 +1,11 @@
 import {_decorator, instantiate, Label, Node, Prefab} from "cc";
 import {UIView} from "db://assets/Script/core/ui/UIView";
-import {Room, TableInfo} from "db://assets/Script/example/proto/client";
+import {Action, OnFrame, OnFrame_Player, Room, TableInfo} from "db://assets/Script/example/proto/client";
 import {oo} from "db://assets/Script/core/oo";
 import {Tetris} from "db://assets/Script/example/Tetris";
 import {ActionType} from "db://assets/Script/example/proto/consts";
+import {EventMgr} from "db://assets/Script/core/common/EventManager";
+import {channel} from "db://assets/Script/example/Channel";
 
 const {ccclass, property} = _decorator;
 
@@ -22,19 +24,21 @@ export default class UIControl extends UIView {
     tetrisManager: { [key: number]: Tetris } = {};
 
     dropCounter: number = 0;
-    dropInterval: number = 0;
+    dropInterval: number = 1;
+
+    isInitialize: boolean = false;
 
     public onOpen(fromUI: number, ...args) {
         super.onOpen(fromUI, ...args);
-
+        oo.log.logView(args, "UIControl.onOpen");
+        EventMgr.addEventListener("onFrame", this.onFrame, this);
         let tableInfo = args[0] as TableInfo;
         let room: Room = tableInfo.room;
         this.title.string = room.name
-
         oo.random.isClient = true;
         oo.random.isGlobal = true;
         oo.random.setSeed(tableInfo.randSeed);
-
+        // 初始化
         switch (room.roomId) {
             // 1v1
             case "1":
@@ -48,22 +52,15 @@ export default class UIControl extends UIView {
                     this.node.addChild(parent);
                     // 保存
                     for (const [uid, _] of Object.entries(tableInfo.players)) {
-                        let isMy: boolean = parseInt(uid) == oo.storage.getUser();
-                        let t: Tetris;
-                        if (isMy) {
-                            t = parent.getChildByName("my").getComponent("Tetris") as Tetris;
-                            t.onAdded({id:uid, draw0:true});
+                        let name: string = parseInt(uid) == oo.storage.getUser() ? "my" : "enemy";
+                        let t: Tetris = parent.getChildByName(name).getComponent("Tetris") as Tetris;
+                        if (name == "my") {
                             this.my = t;
-
-                            t.player.reset();
-                        } else {
-                            t = parent.getChildByName("enemy").getComponent("Tetris") as Tetris;
-                            t.onAdded({id:uid, draw0:true});
                         }
-
+                        t.onAdded({uid, draw0: true});
                         this.tetrisManager[uid] = t;
                     }
-
+                    oo.log.logView("", "res.ok");
                 });
                 break
             case "2":
@@ -73,30 +70,51 @@ export default class UIControl extends UIView {
         }
     }
 
-    update(deltaTime: number) {
-        this.dropCounter += deltaTime;
-        if (this.my && this.dropCounter > this.dropInterval) {
-            this.my.serialize(ActionType.DROP, 1);
+    onDestroy() {
+        super.onDestroy();
+        EventMgr.removeEventListener("onFrame", this.onFrame, this);
+        oo.log.logView("UIControl.onDestroy");
+    }
+
+    public onFrame(event: string, args: any) {
+        let frame = args as OnFrame;
+        oo.log.logView(frame, "onFrame");
+        if (frame.frameId == 0) {
+            for (const [uid, t] of Object.entries(this.tetrisManager)) {
+                t.player.pieceList = frame.pieceList;
+                t.player.reset();
+            }
+        } else {
+            frame.playerList.forEach((player: OnFrame_Player) => {
+                let t = this.tetrisManager[player.userId];
+                if (t.player) {
+                    t.unserialize(player);
+                }
+            })
         }
     }
 
+    update(deltaTime: number) {
+        //
+    }
+
     onLeft() {
-        this.my.serialize(ActionType.MOVE, -1);
+        this.my.serialize(ActionType.MOVE, -1)
     }
 
     onRight() {
-        this.my.serialize(ActionType.MOVE, 1);
+        this.my.serialize(ActionType.MOVE, 1)
     }
 
     onUp() {
-        this.my.serialize(ActionType.ROTATE, 1);
+        this.my.serialize(ActionType.ROTATE, 1)
     }
 
     onDrop() {
-        this.my.serialize(ActionType.DROP, 1);
+        this.my.serialize(ActionType.DROP, 1)
     }
 
     onQuick() {
-        this.my.serialize(ActionType.QUICK_DROP, 0);
+        this.my.serialize(ActionType.QUICK_DROP, 0)
     }
 }

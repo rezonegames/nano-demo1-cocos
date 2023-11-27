@@ -1550,7 +1550,7 @@
     },
     "component": "",
     "_componentId": "faeectzYvZP5Li4Myf4CpHM",
-    "handler": "onTop",
+    "handler": "onUp",
     "customEventData": ""
   },
   {

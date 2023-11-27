@@ -8,7 +8,7 @@
 
 import { Asset, js, error, Constructor, resources, __private, assetManager, AssetManager } from "cc";
 export type ProgressCallback = __private._cocos_asset_asset_manager_deprecated__LoadProgressCallback;
-type CompleteCallback<T = any> = any;       // (error: Error | null, asset: T) => void;  (error: Error | null, asset: T[], urls: string[]) => void;
+export type CompleteCallback<T = any> = any;       // (error: Error | null, asset: T) => void;  (error: Error | null, asset: T[], urls: string[]) => void;
 type IRemoteOptions = { [k: string]: any; ext?: string; } | null;
 
 export type AssetType<T = Asset> = Constructor<T>;
