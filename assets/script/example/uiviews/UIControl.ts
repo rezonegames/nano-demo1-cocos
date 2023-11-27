@@ -1,6 +1,6 @@
 import {_decorator, instantiate, Label, Node, Prefab} from "cc";
 import {UIView} from "db://assets/Script/core/ui/UIView";
-import {Action, OnFrame, OnFrame_Player, Room, TableInfo} from "db://assets/Script/example/proto/client";
+import {Action, LoadRes, OnFrame, OnFrame_Player, Room, TableInfo} from "db://assets/Script/example/proto/client";
 import {oo} from "db://assets/Script/core/oo";
 import {Tetris} from "db://assets/Script/example/Tetris";
 import {ActionType} from "db://assets/Script/example/proto/consts";
@@ -61,6 +61,9 @@ export default class UIControl extends UIView {
                         this.tetrisManager[uid] = t;
                     }
                     oo.log.logView("", "res.ok");
+
+                    let buf = LoadRes.encode({current:100}).finish();
+                    channel.gameNotify("r.loadres", buf);
                 });
                 break
             case "2":

@@ -263,6 +263,9 @@ export class NetChannelManager {
                             break
                         case TableState.GAMING:
                             break;
+                        case TableState.SETTLEMENT:
+                            uiManager.replace(UIID.UISettlement, resp);
+                            break;
                     }
                     break
 
