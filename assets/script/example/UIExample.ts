@@ -40,7 +40,8 @@ export let UICF: { [key: number]: UIConf } = {
 export default class UIExample extends Component {
 
     onLoad() {
-        oo.http.server = "http://127.0.0.1:8000";
+        oo.http.server = `http://127.0.0.1:8000`;
+        oo.http.server = `http://192.168.8.76:8000`;
         channel.gameCreate();
     }
 
@@ -48,8 +49,5 @@ export default class UIExample extends Component {
         uiManager.initUIConf(UICF);
         uiManager.open(UIID.UILogin);
         // uiManager.open(UIID.UIHeader);
-    }
-
-    update(dt) {
     }
 }

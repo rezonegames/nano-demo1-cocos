@@ -94,7 +94,17 @@ export interface GameStateResp {
 
 export interface Action {
   key: ActionType;
+  /** 普通动作，只有一个值 */
   val: number;
+  toList: Action_To[];
+  /** 结束，比如玩家已不在线，但是结束了 */
+  who: number;
+}
+
+/** 道具，buff，combo */
+export interface Action_To {
+  userId: number;
+  valList: number[];
 }
 
 export interface UpdateFrame {
@@ -952,7 +962,7 @@ export const GameStateResp = {
 };
 
 function createBaseAction(): Action {
-  return { key: 0, val: 0 };
+  return { key: 0, val: 0, toList: [], who: 0 };
 }
 
 export const Action = {
@@ -962,6 +972,12 @@ export const Action = {
     }
     if (message.val !== 0) {
       writer.uint32(16).int32(message.val);
+    }
+    for (const v of message.toList) {
+      Action_To.encode(v!, writer.uint32(26).fork()).ldelim();
+    }
+    if (message.who !== 0) {
+      writer.uint32(32).int64(message.who);
     }
     return writer;
   },
@@ -987,6 +1003,78 @@ export const Action = {
 
           message.val = reader.int32();
           continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.toList.push(Action_To.decode(reader, reader.uint32()));
+          continue;
+        case 4:
+          if (tag !== 32) {
+            break;
+          }
+
+          message.who = longToNumber(reader.int64() as Long);
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseAction_To(): Action_To {
+  return { userId: 0, valList: [] };
+}
+
+export const Action_To = {
+  encode(message: Action_To, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.userId !== 0) {
+      writer.uint32(8).int64(message.userId);
+    }
+    writer.uint32(18).fork();
+    for (const v of message.valList) {
+      writer.int32(v);
+    }
+    writer.ldelim();
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): Action_To {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseAction_To();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.userId = longToNumber(reader.int64() as Long);
+          continue;
+        case 2:
+          if (tag === 16) {
+            message.valList.push(reader.int32());
+
+            continue;
+          }
+
+          if (tag === 18) {
+            const end2 = reader.uint32() + reader.pos;
+            while (reader.pos < end2) {
+              message.valList.push(reader.int32());
+            }
+
+            continue;
+          }
+
+          break;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;

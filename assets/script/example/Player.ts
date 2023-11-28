@@ -4,37 +4,26 @@ import {oo} from "db://assets/Script/core/oo";
 
 export class Player {
 
-    // 位置
-    pos: { x: number, y: number }
-    // 方块形状及位置
-    matrix: Array<number>[]
-    // 分数
-    score: number
-    // arena
-    arena: Arena
-    // 时间计数器
-    dropCounter: any
-    // 下降速度，todo：可以设置
-    dropInterval: number
-    DROP_SLOW = 1
-    DROP_FAST = 0.05
-
     uid: number
-    // 事件
-    events = new EventTarget;
-
-    // 在第1帧的时候初始化
-    pieceList: number[]
+    teamId: number
+    pos: { x: number, y: number } // 位置
+    matrix: Array<number>[] // 方块形状及位置
+    score: number // 分数
+    arena: Arena // arena
+    events = new EventTarget; // 事件
+    pieceList: number[]; // 在第1帧的时候初始化
     index: number;
+    combo: number; // 连击
+    disturbBuff: boolean; // 干扰buff
 
-    constructor(arena: Arena, uid: number) {
+    constructor(arena: Arena, uid: number, teamId: number) {
         this.pos = {x: 0, y: 0};
         this.score = 0;
-        this.dropCounter = 0;
-        this.dropInterval = this.DROP_SLOW;
         this.arena = arena;
         this.uid = uid;
         this.index = 0;
+        this.combo = 0;
+        this.teamId = teamId;
     }
 
     createPiece(type) {
@@ -83,34 +72,42 @@ export class Player {
         }
     }
 
-    drop() {
+    drop(): boolean {
         this.pos.y++;
-        this.dropCounter = 0;
         if (this.arena.collide(this)) {
             this.pos.y--;
             this.arena.merge(this);
             this.reset();
-            this.score += this.arena.sweep();
+            let score = this.arena.sweep();
+            this.checkCombo(score);
+            this.score += score
             this.events.emit('score', this.score);
-            return;
+            return false;
         }
         this.events.emit('pos', this.pos);
+        return true;
+    }
+
+    addDisturbBuff(second: number) {
+        this.disturbBuff = true;
+        setTimeout(()=>{
+            this.disturbBuff = false;
+        }, second*1000)
+    }
+
+    checkCombo(score: number) {
+        if (score == 0) {
+            this.combo = 0;
+            return;
+        }
+        this.combo++;
+        if (this.combo >= 2) {
+            this.events.emit('combo', this.combo);
+        }
     }
 
     dropDown() {
-        // console.log("dropdown");
-        while (true) {
-            this.pos.y++;
-            this.dropCounter = 0;
-            if (this.arena.collide(this)) {
-                this.pos.y--;
-                this.arena.merge(this);
-                this.events.emit('pos', this.pos);
-                this.reset();
-                this.score += this.arena.sweep();
-                this.events.emit('score', this.score);
-                return;
-            }
+        while (this.drop()) {
         }
     }
 
@@ -127,7 +124,7 @@ export class Player {
         const pieces = 'ILJOTSZ';
         this.matrix = this.createPiece(pieces[this.pieceList[this.index]]);
         this.index++;
-        if(this.index > this.pieceList.length -1) {
+        if (this.index > this.pieceList.length - 1) {
             this.index = 0;
         }
         this.pos.y = 0;
@@ -173,14 +170,6 @@ export class Player {
             matrix.forEach(row => row.reverse());
         } else {
             matrix.reverse();
-        }
-    }
-
-    // todo：暂时不用，以后再打开
-    update(deltaTime) {
-        this.dropCounter += deltaTime;
-        if (this.dropCounter > this.dropInterval) {
-            this.drop();
         }
     }
 

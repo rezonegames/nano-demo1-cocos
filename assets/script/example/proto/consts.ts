@@ -53,6 +53,8 @@ export enum ActionType {
   DROP = 4,
   QUICK_DROP = 5,
   ITEM_USE = 6,
+  BUFF_DISTURB = 7,
+  COMBO = 8,
   END = 100,
   UNRECOGNIZED = -1,
 }

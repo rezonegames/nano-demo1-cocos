@@ -71,4 +71,9 @@ export class Arena {
         return score;
     }
 
+    push(row: Array<number>) {
+        this.matrix.push(row);
+        this.matrix.splice(0, 1)
+    }
+
 }
