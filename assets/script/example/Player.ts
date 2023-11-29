@@ -90,9 +90,9 @@ export class Player {
 
     addDisturbBuff(second: number) {
         this.disturbBuff = true;
-        setTimeout(()=>{
+        setTimeout(() => {
             this.disturbBuff = false;
-        }, second*1000)
+        }, second * 1000)
     }
 
     checkCombo(score: number) {
@@ -103,6 +103,12 @@ export class Player {
         this.combo++;
         if (this.combo >= 2) {
             this.events.emit('combo', this.combo);
+        }
+        if (score == 70) {
+            this.events.emit('combo_3', 0);
+        }
+        if (score == 150) {
+            this.events.emit('combo_4', 0);
         }
     }
 

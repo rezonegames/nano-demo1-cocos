@@ -1,8 +1,7 @@
-import {_decorator, instantiate, Label, Node, Prefab} from "cc";
+import {_decorator, instantiate, Label, Node, Prefab, Button} from "cc";
 import {UIView} from "db://assets/Script/core/ui/UIView";
 import {
     Action,
-    Action_To,
     LoadRes,
     OnFrame,
     OnFrame_Player,
@@ -38,6 +37,9 @@ export default class UIControl extends UIView {
         EventMgr.removeEventListener("onFrame", this.onFrame, this);
         oo.log.logView("UIControl.onDestroy");
     }
+
+    @property([Button])
+    buttonArray: Button[]
 
     public onOpen(fromUI: number, ...args) {
         super.onOpen(fromUI, ...args);
@@ -81,39 +83,45 @@ export default class UIControl extends UIView {
             default:
                 break
         }
+
+
     }
 
     initTetris(player: TableInfo_Player, tetris: Tetris) {
         tetris.onAdded({uid: player.profile?.userId, draw0: true, teamId: player.teamId});
         // 玩家的所有事件
-        ['pos', 'end', 'matrix', 'score', 'combo'].forEach(key => {
-            let who = oo.storage.getUser() == tetris.player.uid ? 0 : tetris.player.uid;
+        ['pos', 'end', 'matrix', 'score', 'combo', 'combo_3', 'combo_4'].forEach(key => {
+            let from = oo.storage.getUser() == tetris.player.uid ? 0 : tetris.player.uid;
             tetris.player.events.on(key, (val) => {
                 switch (key) {
                     case "score":
                         tetris.updateScore(val);
                         break;
                     case "end":
-                        this.serialize(ActionType.END, 0, [], who);
+                        this.serialize(ActionType.END, [], 0, from);
                         break;
                     case "pos":
                     case "matrix":
                         tetris.draw();
                         break;
                     case "combo":
-                        if (who == 0) {
-                            let toList: Action_To[] = [];
-                            for (const [uid, t] of Object.entries(this.tetrisManager)) {
-                                if (t.player.teamId != tetris.player.teamId) {
-                                    toList.push({
-                                        userId: t.player.uid,
-                                        valList: oo.random.getRandomByMinMaxList(0, 11, 2),
-                                    });
-                                }
-                            }
-                            this.serialize(ActionType.COMBO, 0, toList);
+                        if (from == 0) {
+                            let valList = oo.random.getRandomByMinMaxList(0, 11, 2);
+                            this.serialize(ActionType.COMBO, valList);
                         }
                         break;
+                    case "combo_3":
+                        if (from == 0) {
+                            let valList = oo.random.getRandomByMinMaxList(0, 11, 4);
+                            this.serialize(ActionType.COMBO_3, valList);
+                        }
+                        break;
+                    case "combo_4":
+                        if (from == 0) {
+                            let valList = oo.random.getRandomByMinMaxList(0, 11, 6);
+                            this.serialize(ActionType.COMBO_3, valList);
+                        }
+                        break
                     default:
                         break
                 }
@@ -129,46 +137,64 @@ export default class UIControl extends UIView {
     }
 
     // 发送状态数据
-    serialize(action: ActionType, val: any, toList: Action_To[] = [], who: number = 0) {
-        let buf = UpdateFrame.encode({action: {key: action, val: val, who, toList}}).finish();
+    serialize(action: ActionType, valList: number[], to: number = 0, from: number = 0) {
+        let buf = UpdateFrame.encode({action: {key: action, valList, from, to}}).finish();
         channel.gameNotify("r.update", buf);
     }
 
     // 解析状态数据
-    unserialize(t: Tetris, msg: OnFrame_Player) {
+    unserialize(tetris: Tetris, msg: OnFrame_Player) {
+
+        const addCombo = function (action: Action) {
+
+        }
+
         let actionList = msg.actionList;
+        let uid = msg.userId;
         actionList.forEach((action: Action) => {
-            let val = action.val;
+            let valList = action.valList;
             switch (action.key) {
                 case ActionType.MOVE:
-                    t.player.move(val);
+                    tetris.player.move(valList[0]);
                     break;
                 case ActionType.DROP:
-                    for (let i = 0; i < val; i++) {
-                        t.player.drop();
+                    for (let i = 0; i < valList[0]; i++) {
+                        tetris.player.drop();
                     }
                     break;
                 case ActionType.QUICK_DROP:
-                    t.player.dropDown();
+                    tetris.player.dropDown();
                     break;
                 case ActionType.ROTATE:
-                    t.player.rotate(val);
+                    tetris.player.rotate(valList[0]);
                     break;
                 case ActionType.COMBO:
-                    let toList = action.toList;
-                    toList.forEach((to: Action_To) => {
-                        let row: Array<number> = []
-                        for (let i = 0; i < 12; i++) {
-                            let v = to.valList.indexOf(i) !== -1 ? 0 : 3;
-                            row.push(v);
-                        }
-                        this.tetrisManager[to.userId].arena.push(row);
-                    });
+                    this.addCombo(tetris, action.valList);
+                    break;
+
+                case ActionType.COMBO_3:
+                case ActionType.COMBO_4:
+                    for (let i = 0; i < action.valList.length; i += 2) {
+                        this.addCombo(tetris, action.valList.slice(i, i + 2));
+                    }
                     break;
                 default:
                     break
             }
         });
+    }
+
+    public addCombo(tetris: Tetris, valList: number[]) {
+        let row: Array<number> = []
+        for (let i = 0; i < 12; i++) {
+            let v = valList.indexOf(i) !== -1 ? 0 : 3;
+            row.push(v);
+        }
+        for (const [_, t] of Object.entries(this.tetrisManager)) {
+            if (t.player.teamId !== tetris.player.teamId) {
+                t.arena.push(row);
+            }
+        }
     }
 
     public onFrame(event: string, args: any) {
@@ -194,11 +220,11 @@ export default class UIControl extends UIView {
     }
 
     onLeft() {
-        this.serialize(ActionType.MOVE, -1)
+        this.serialize(ActionType.MOVE, [-1])
     }
 
     onRight() {
-        this.serialize(ActionType.MOVE, 1)
+        this.serialize(ActionType.MOVE, [1])
     }
 
     onUp() {
@@ -206,14 +232,14 @@ export default class UIControl extends UIView {
         if (this.my.player.disturbBuff) {
             val = oo.random.getRandomInt(0, 1) == 0 ? 1 : -1;
         }
-        this.serialize(ActionType.ROTATE, val)
+        this.serialize(ActionType.ROTATE, [val])
     }
 
     onDrop() {
-        this.serialize(ActionType.DROP, 1)
+        this.serialize(ActionType.DROP, [1])
     }
 
     onQuick() {
-        this.serialize(ActionType.QUICK_DROP, 0)
+        this.serialize(ActionType.QUICK_DROP, [0])
     }
 }

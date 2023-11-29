@@ -55,6 +55,8 @@ export enum ActionType {
   ITEM_USE = 6,
   BUFF_DISTURB = 7,
   COMBO = 8,
+  COMBO_4 = 9,
+  COMBO_3 = 10,
   END = 100,
   UNRECOGNIZED = -1,
 }
