@@ -7,23 +7,20 @@ export class Arena {
 
     events = new EventTarget;
 
-    constructor(w:number, h:number) {
+    constructor(w: number, h: number) {
         const matrix = [];
         while (h--) {
             matrix.push(new Array(w).fill(0));
         }
         this.matrix = matrix;
-
     }
 
-    clear()
-    {
+    clear() {
         this.matrix.forEach(row => row.fill(0));
         this.events.emit('matrix', this.matrix);
     }
 
-    collide(player: Player)
-    {
+    collide(player: Player) {
         const [m, o] = [player.matrix, player.pos];
         for (let y = 0; y < m.length; ++y) {
             for (let x = 0; x < m[y].length; ++x) {
@@ -37,8 +34,7 @@ export class Arena {
         return false;
     }
 
-    merge(player: Player)
-    {
+    merge(player: Player) {
         player.matrix.forEach((row, y) => {
             row.forEach((value, x) => {
                 if (value !== 0) {
@@ -49,8 +45,7 @@ export class Arena {
         this.events.emit('matrix', this.matrix);
     }
 
-    sweep()
-    {
+    sweep() {
         let rowCount = 1;
         let score = 0;
         outer: for (let y = this.matrix.length - 1; y > 0; --y) {
@@ -71,9 +66,27 @@ export class Arena {
         return score;
     }
 
-    push(row: Array<number>) {
+    push(valList: Array<number>) {
+        let row: Array<number> = []
+        for (let i = 0; i < this.matrix[0].length; i++) {
+            let v = valList.indexOf(i) !== -1 ? 0 : 3;
+            row.push(v);
+        }
         this.matrix.push(row);
-        this.matrix.splice(0, 1)
+        this.matrix.splice(0, 1);
+        this.events.emit('matrix', this.matrix);
     }
 
+    unshift() {
+        const row = this.matrix.splice(this.matrix.length - 1, 1)[0].fill(0);
+        this.matrix.unshift(row);
+        this.events.emit('matrix', this.matrix);
+    }
+
+    setMatrix(valList: Array<number>) {
+        for (let i = 0; i < valList.length; i += 3) {
+            const [y, x, val] = [valList[i], valList[i+1], valList[i+2]];
+            this.matrix[y][x] = val;
+        }
+    }
 }

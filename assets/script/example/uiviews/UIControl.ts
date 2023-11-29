@@ -1,4 +1,4 @@
-import {_decorator, instantiate, Label, Node, Prefab, Button} from "cc";
+import {_decorator, Button, instantiate, Label, Node, Prefab} from "cc";
 import {UIView} from "db://assets/Script/core/ui/UIView";
 import {
     Action,
@@ -136,29 +136,28 @@ export default class UIControl extends UIView {
         });
     }
 
-    // 发送状态数据
+    // 发送操作数据
     serialize(action: ActionType, valList: number[], to: number = 0, from: number = 0) {
         let buf = UpdateFrame.encode({action: {key: action, valList, from, to}}).finish();
         channel.gameNotify("r.update", buf);
     }
 
-    // 解析状态数据
+    // 解析网络过来的操作数据
     unserialize(tetris: Tetris, msg: OnFrame_Player) {
-
-        const addCombo = function (action: Action) {
-
-        }
-
         let actionList = msg.actionList;
         let uid = msg.userId;
+
         actionList.forEach((action: Action) => {
             let valList = action.valList;
+            let to = this.tetrisManager[action.to];
             switch (action.key) {
                 case ActionType.MOVE:
-                    tetris.player.move(valList[0]);
+                    for (let i = 0; i < valList.length; i++) {
+                        tetris.player.move(valList[i]);
+                    }
                     break;
                 case ActionType.DROP:
-                    for (let i = 0; i < valList[0]; i++) {
+                    for (let i = 0; i < valList.length; i++) {
                         tetris.player.drop();
                     }
                     break;
@@ -166,17 +165,37 @@ export default class UIControl extends UIView {
                     tetris.player.dropDown();
                     break;
                 case ActionType.ROTATE:
-                    tetris.player.rotate(valList[0]);
+                    for (let i = 0; i < valList.length; i++) {
+                        tetris.player.rotate(valList[i]);
+                    }
                     break;
+                // 队伍不一样，从下往上加
                 case ActionType.COMBO:
-                    this.addCombo(tetris, action.valList);
-                    break;
-
                 case ActionType.COMBO_3:
                 case ActionType.COMBO_4:
-                    for (let i = 0; i < action.valList.length; i += 2) {
-                        this.addCombo(tetris, action.valList.slice(i, i + 2));
+                    for (const [_, t] of Object.entries(this.tetrisManager)) {
+                        if (t.player.teamId !== tetris.player.teamId) {
+                            for (let i = 0; i < valList.length; i += 2) {
+                                t.arena.push(valList.slice(i, i + 2));
+                            }
+                        }
                     }
+                    break;
+                case ActionType.ITEM_ADD_ROW:
+                    for (let i = 0; i < valList.length; i += 2) {
+                        to.arena.push(valList.slice(i, i + 2));
+                    }
+                    break;
+                case ActionType.ITEM_DEL_ROW:
+                    for (let i = 0; i < valList[0]; i++) {
+                        to.arena.unshift();
+                    }
+                    break;
+                case ActionType.ITEM_BOOM:
+                    to.arena.setMatrix(valList);
+                    break;
+                case ActionType.ITEM_BUFF_DISTURB:
+                    to.player.addDisturbBuff(valList[0]);
                     break;
                 default:
                     break
@@ -184,22 +203,9 @@ export default class UIControl extends UIView {
         });
     }
 
-    public addCombo(tetris: Tetris, valList: number[]) {
-        let row: Array<number> = []
-        for (let i = 0; i < 12; i++) {
-            let v = valList.indexOf(i) !== -1 ? 0 : 3;
-            row.push(v);
-        }
-        for (const [_, t] of Object.entries(this.tetrisManager)) {
-            if (t.player.teamId !== tetris.player.teamId) {
-                t.arena.push(row);
-            }
-        }
-    }
-
     public onFrame(event: string, args: any) {
         let frame = args as OnFrame;
-        oo.log.logView(frame, "onFrame");
+        // oo.log.logView(frame, "onFrame");
         if (frame.frameId == 0) {
             for (const [uid, t] of Object.entries(this.tetrisManager)) {
                 t.player.pieceList = frame.pieceList;
@@ -215,28 +221,40 @@ export default class UIControl extends UIView {
         }
     }
 
-    update(deltaTime: number) {
-        //
+    touch(val: number, touchCounter: number): number[] {
+        // 有buff，是反的
+        if (this.my.player.disturbBuff) {
+            val = oo.random.getRandomInt(0, 1) == 0 ? val : -val;
+        }
+        let valList: number[] = [];
+        if (touchCounter <= 4) {
+            valList.push(val);
+        } else if (touchCounter > 4 && touchCounter < 8) {
+            valList.push(val, val)
+        } else if (touchCounter >= 8 && touchCounter < 15) {
+            valList.push(val, val, val)
+        } else {
+            for (let i = this.my.player.pos.x; i >= 0; i--) {
+                valList.push(val)
+            }
+        }
+        return valList;
     }
 
-    onLeft() {
-        this.serialize(ActionType.MOVE, [-1])
+    onLeft(touchCounter: number, customEventData?: any) {
+        this.serialize(ActionType.MOVE, this.touch(-1, touchCounter));
     }
 
-    onRight() {
-        this.serialize(ActionType.MOVE, [1])
+    onRight(touchCounter: number, customEventData?: any) {
+        this.serialize(ActionType.MOVE, this.touch(1, touchCounter));
     }
 
     onUp() {
-        let val = 1;
-        if (this.my.player.disturbBuff) {
-            val = oo.random.getRandomInt(0, 1) == 0 ? 1 : -1;
-        }
-        this.serialize(ActionType.ROTATE, [val])
+        this.serialize(ActionType.ROTATE, this.touch(1, 1));
     }
 
-    onDrop() {
-        this.serialize(ActionType.DROP, [1])
+    onDrop(touchCounter: number, customEventData?: any) {
+        this.serialize(ActionType.DROP, this.touch(1, touchCounter));
     }
 
     onQuick() {

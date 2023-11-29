@@ -219,6 +219,13 @@ class NetNodeGame extends NetNode {
         }
     }
 
+    protected onClosed(event: any) {
+        oo.log.logNet(event, "连接关闭");
+        this.rejectReconnect();
+        super.onClosed(event);
+        uiManager.replace(UIID.UILogin);
+    }
+
     public request1(route: string, buf: NetData, rspObject: CallbackObject, showTips: boolean = true, force: boolean = false) {
         let msgId = this.lastMsgId++;
         this.request(Package.encode(Package.TYPE_DATA, this.encode(msgId, route, buf)), msgId, rspObject, showTips, force);

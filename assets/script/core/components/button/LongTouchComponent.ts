@@ -2,16 +2,6 @@ import {_decorator, Component, Node, UITransform} from "cc";
 
 const { ccclass, property } = _decorator;
 /**
- * @classdesc 长按监听组件
- * @author caizhitao
- * @version 0.1.0
- * @since 2018-11-24
- * @description
- *
- * 1. 将本组件挂载在节点上
- * 2. 在属性检查器上设置对应的回调事件
- * 3. 长按挂载的节点，那么就会一直回调第2步中设置的事件
- *
  * @example
  *
  * ```
@@ -65,17 +55,18 @@ export default class LongTouchComponent extends Component {
     }
 
     private _onTouchStart(event: any) {
+        // console.log("_onTouchStart", Date.now());
         // 这是为了不支持多点触控
         if (!this.enableMultiTouching) {
             if (this._isTouching) {
                 return;
             }
-
-            if (this.node.getComponent(UITransform).getBoundingBoxToWorld().contains(event.getLocation())) {
-                this._isTouching = true;
-            } else {
-                this._isTouching = false;
-            }
+            this._isTouching = true;
+            // if (this.node.getComponent(UITransform).getBoundingBoxToWorld().contains(event.getLocation())) {
+            //     this._isTouching = true;
+            // } else {
+            //     this._isTouching = false;
+            // }
 
             if (this._isTouching) {
                 // 第一次触摸立即回调一次
@@ -88,12 +79,14 @@ export default class LongTouchComponent extends Component {
     }
 
     private _onTouchEnd(event: any) {
+        // console.log("_onTouchEnd", Date.now());
         this._isTouching = false;
         this._touchCounter = 0;
         this.unschedule(this._touchCounterCallback);
     }
 
     private _onTouchCancel(event: any) {
+        // console.log("_onTouchCancel");
         this._isTouching = false;
         this._touchCounter = 0;
         this.unschedule(this._touchCounterCallback);

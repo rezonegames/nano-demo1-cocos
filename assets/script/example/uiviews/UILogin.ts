@@ -21,6 +21,14 @@ export default class UILogin extends UIView {
 
     private resp: AccountLoginResp
 
+    onOpen(fromUI: number, ...args) {
+        super.onOpen(fromUI, ...args);
+        oo.http.server = `http://127.0.0.1:8000`;
+        oo.http.server = `http://192.168.8.76:8000`;
+        channel.gameClose();
+        channel.gameCreate();
+    }
+
     start() {
         this.clearConnect();
     }

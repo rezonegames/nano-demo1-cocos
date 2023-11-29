@@ -18,6 +18,7 @@ export enum GameState {
   WAIT = 1,
   /** INGAME - 已分到桌子 */
   INGAME = 2,
+  LOGOUT = 3,
   UNRECOGNIZED = -1,
 }
 
@@ -52,11 +53,15 @@ export enum ActionType {
   ROTATE = 3,
   DROP = 4,
   QUICK_DROP = 5,
-  ITEM_USE = 6,
-  BUFF_DISTURB = 7,
+  /** COMBO - 连击 */
   COMBO = 8,
   COMBO_4 = 9,
   COMBO_3 = 10,
+  /** ITEM_BOOM - 道具 */
+  ITEM_BOOM = 11,
+  ITEM_BUFF_DISTURB = 12,
+  ITEM_ADD_ROW = 13,
+  ITEM_DEL_ROW = 14,
   END = 100,
   UNRECOGNIZED = -1,
 }
