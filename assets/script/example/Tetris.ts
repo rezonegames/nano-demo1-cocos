@@ -1,6 +1,7 @@
 import {_decorator, Component, instantiate, Label, Node, Prefab, Sprite, SpriteFrame, Widget} from 'cc';
 import {Arena} from "db://assets/Script/example/Arena";
 import {Player} from "db://assets/Script/example/Player";
+
 const {ccclass, property} = _decorator;
 
 @ccclass('Tetris')
@@ -52,7 +53,6 @@ export class Tetris extends Component {
 
     onAdded(args: any) {
         // 创建
-        this.draw0 = args.draw0;
         this.arena = new Arena(this.config.w, this.config.h);
         this.player = new Player(this.arena, args.uid, args.teamId);
     }
@@ -73,25 +73,14 @@ export class Tetris extends Component {
     }
 
     draw() {
-        if (this.draw0) {
-            this.fill0(this.arena.matrix);
-        } else {
-            this.fillNull(this.arena.matrix);
-        }
+        this.fillNull(this.arena.matrix);
         this.drawMatrix(this.arena.matrix, {x: 0, y: 0});
         this.drawMatrix(this.player.matrix, this.player.pos);
+        this.drawShadowMatrix();
     }
 
     update(deltaTime: number) {
         // this.player.update(deltaTime);
-    }
-
-    fill0(matrix) {
-        matrix.forEach((row, y) => {
-            row.forEach((value, x) => {
-                this.itemArray[y][x].getComponent(Sprite).spriteFrame = this.spriteArray[0];
-            });
-        });
     }
 
     fillNull(matrix) {
@@ -111,6 +100,28 @@ export class Tetris extends Component {
                         return;
                     }
                     this.itemArray[y + offset.y][x + offset.x].getComponent(Sprite).spriteFrame = this.spriteArray[value];
+                }
+            });
+        });
+    }
+
+    // 画影子
+    drawShadowMatrix() {
+        let matrix = this.player.matrix;
+        let offset = {x: this.player.pos.x, y: this.player.pos.y};
+        while (!this.arena.collide1(this.player, offset)) {
+            offset.y++;
+        }
+        offset.y--
+
+        matrix.forEach((row, y) => {
+            row.forEach((value, x) => {
+                if (value != 0) {
+                    const [oy, ox] = [y + offset.y, x + offset.x];
+                    if (oy > this.config.h || oy < 0 || ox > this.config.w || ox < 0) {
+                        return;
+                    }
+                    this.itemArray[y + offset.y][x + offset.x].getComponent(Sprite).spriteFrame = this.spriteArray[1];
                 }
             });
         });

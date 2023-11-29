@@ -593,12 +593,9 @@
       "__expectedType__": "cc.Prefab"
     },
     "spriteArray": [
+      null,
       {
         "__uuid__": "4e3f800a-abbc-4c8d-b89b-f8f24e76c3f5@f9941",
-        "__expectedType__": "cc.SpriteFrame"
-      },
-      {
-        "__uuid__": "a2e5b44b-f83f-4346-b8d6-f00cfd586a6a@f9941",
         "__expectedType__": "cc.SpriteFrame"
       },
       {
@@ -623,6 +620,10 @@
       },
       {
         "__uuid__": "1397b237-e3ab-403c-ab95-73384eeb5b97@f9941",
+        "__expectedType__": "cc.SpriteFrame"
+      },
+      {
+        "__uuid__": "a2e5b44b-f83f-4346-b8d6-f00cfd586a6a@f9941",
         "__expectedType__": "cc.SpriteFrame"
       }
     ],

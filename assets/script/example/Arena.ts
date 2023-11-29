@@ -34,6 +34,20 @@ export class Arena {
         return false;
     }
 
+    collide1(player: Player, pos:{x:number, y:number}) {
+        const [m, o] = [player.matrix, pos];
+        for (let y = 0; y < m.length; ++y) {
+            for (let x = 0; x < m[y].length; ++x) {
+                if (m[y][x] !== 0 &&
+                    (this.matrix[y + o.y] &&
+                        this.matrix[y + o.y][x + o.x]) !== 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     merge(player: Player) {
         player.matrix.forEach((row, y) => {
             row.forEach((value, x) => {
@@ -69,7 +83,7 @@ export class Arena {
     push(valList: Array<number>) {
         let row: Array<number> = []
         for (let i = 0; i < this.matrix[0].length; i++) {
-            let v = valList.indexOf(i) !== -1 ? 0 : 3;
+            let v = valList.indexOf(i) !== -1 ? 0 : 1;
             row.push(v);
         }
         this.matrix.push(row);

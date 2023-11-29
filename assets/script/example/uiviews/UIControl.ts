@@ -88,7 +88,7 @@ export default class UIControl extends UIView {
     }
 
     initTetris(player: TableInfo_Player, tetris: Tetris) {
-        tetris.onAdded({uid: player.profile?.userId, draw0: true, teamId: player.teamId});
+        tetris.onAdded({uid: player.profile?.userId, draw0: false, teamId: player.teamId});
         // 玩家的所有事件
         ['pos', 'end', 'matrix', 'score', 'combo', 'combo_3', 'combo_4'].forEach(key => {
             let from = oo.storage.getUser() == tetris.player.uid ? 0 : tetris.player.uid;
@@ -221,7 +221,7 @@ export default class UIControl extends UIView {
         }
     }
 
-    touch(val: number, touchCounter: number): number[] {
+    touch(val: number, touchCounter: number, offset: number = 0): number[] {
         // 有buff，是反的
         if (this.my.player.disturbBuff) {
             val = oo.random.getRandomInt(0, 1) == 0 ? val : -val;
@@ -234,7 +234,7 @@ export default class UIControl extends UIView {
         } else if (touchCounter >= 8 && touchCounter < 15) {
             valList.push(val, val, val)
         } else {
-            for (let i = this.my.player.pos.x; i >= 0; i--) {
+            for (let i = this.my.player.pos.x - offset; i >= 0; i--) {
                 valList.push(val)
             }
         }
@@ -254,7 +254,7 @@ export default class UIControl extends UIView {
     }
 
     onDrop(touchCounter: number, customEventData?: any) {
-        this.serialize(ActionType.DROP, this.touch(1, touchCounter));
+        this.serialize(ActionType.DROP, this.touch(1, touchCounter, 1));
     }
 
     onQuick() {

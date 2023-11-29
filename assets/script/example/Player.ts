@@ -8,6 +8,7 @@ export class Player {
     teamId: number
     pos: { x: number, y: number } // 位置
     matrix: Array<number>[] // 方块形状及位置
+
     score: number // 分数
     arena: Arena // arena
     events = new EventTarget; // 事件
@@ -30,8 +31,8 @@ export class Player {
         if (type === 'T') {
             return [
                 [0, 0, 0],
-                [1, 1, 1],
-                [0, 1, 0],
+                [8, 8, 8],
+                [0, 8, 0],
             ];
         } else if (type === 'O') {
             return [
@@ -143,7 +144,7 @@ export class Player {
         }
     }
 
-    rotate(dir) {
+    rotate(dir: number) {
         const pos = this.pos.x;
         let offset = 1;
         this._rotateMatrix(this.matrix, dir);
@@ -159,7 +160,7 @@ export class Player {
         this.events.emit('matrix', this.matrix);
     }
 
-    _rotateMatrix(matrix, dir) {
+    _rotateMatrix(matrix: Array<number>[], dir: number) {
         for (let y = 0; y < matrix.length; ++y) {
             for (let x = 0; x < y; ++x) {
                 [
