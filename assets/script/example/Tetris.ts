@@ -75,8 +75,8 @@ export class Tetris extends Component {
     draw() {
         this.fillNull(this.arena.matrix);
         this.drawMatrix(this.arena.matrix, {x: 0, y: 0});
-        this.drawMatrix(this.player.matrix, this.player.pos);
         this.drawShadowMatrix();
+        this.drawMatrix(this.player.matrix, this.player.pos);
     }
 
     update(deltaTime: number) {
@@ -109,7 +109,7 @@ export class Tetris extends Component {
     drawShadowMatrix() {
         let matrix = this.player.matrix;
         let offset = {x: this.player.pos.x, y: this.player.pos.y};
-        while (!this.arena.collide1(this.player, offset)) {
+        while (!this.arena._collideMatrix(this.player.matrix, offset)) {
             offset.y++;
         }
         offset.y--

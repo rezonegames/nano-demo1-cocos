@@ -219,7 +219,7 @@
       "a": 255
     },
     "_string": "label",
-    "_horizontalAlign": 1,
+    "_horizontalAlign": 0,
     "_verticalAlign": 1,
     "_actualFontSize": 20,
     "_fontSize": 20,

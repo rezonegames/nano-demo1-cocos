@@ -96,6 +96,22 @@ export class Player {
         }, second * 1000)
     }
 
+    boom(valList:Array<number>) {
+        this.arena.setMatrix(valList)
+    }
+
+    delRow() {
+        this.arena.unshift();
+    }
+
+    addRow(valList:Array<number>) {
+        this.arena.push(valList);
+        if(this.arena.collide(this)) {
+            this.pos.y--
+            this.events.emit("pos", this.pos);
+        }
+    }
+
     checkCombo(score: number) {
         if (score == 0) {
             this.combo = 0;

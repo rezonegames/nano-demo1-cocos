@@ -20,22 +20,12 @@ export class Arena {
         this.events.emit('matrix', this.matrix);
     }
 
-    collide(player: Player) {
-        const [m, o] = [player.matrix, player.pos];
-        for (let y = 0; y < m.length; ++y) {
-            for (let x = 0; x < m[y].length; ++x) {
-                if (m[y][x] !== 0 &&
-                    (this.matrix[y + o.y] &&
-                        this.matrix[y + o.y][x + o.x]) !== 0) {
-                    return true;
-                }
-            }
-        }
-        return false;
+    collide(player: Player): boolean {
+        return this._collideMatrix(player.matrix, player.pos);
     }
 
-    collide1(player: Player, pos:{x:number, y:number}) {
-        const [m, o] = [player.matrix, pos];
+    _collideMatrix(matrix: Array<number>[], pos: { x: number, y: number }): boolean {
+        const [m, o] = [matrix, pos];
         for (let y = 0; y < m.length; ++y) {
             for (let x = 0; x < m[y].length; ++x) {
                 if (m[y][x] !== 0 &&
@@ -99,7 +89,7 @@ export class Arena {
 
     setMatrix(valList: Array<number>) {
         for (let i = 0; i < valList.length; i += 3) {
-            const [y, x, val] = [valList[i], valList[i+1], valList[i+2]];
+            const [y, x, val] = [valList[i], valList[i + 1], valList[i + 2]];
             this.matrix[y][x] = val;
         }
     }

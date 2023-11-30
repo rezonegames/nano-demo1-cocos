@@ -176,23 +176,23 @@ export default class UIControl extends UIView {
                     for (const [_, t] of Object.entries(this.tetrisManager)) {
                         if (t.player.teamId !== tetris.player.teamId) {
                             for (let i = 0; i < valList.length; i += 2) {
-                                t.arena.push(valList.slice(i, i + 2));
+                                t.player.addRow(valList.slice(i, i + 2));
                             }
                         }
                     }
                     break;
                 case ActionType.ITEM_ADD_ROW:
                     for (let i = 0; i < valList.length; i += 2) {
-                        to.arena.push(valList.slice(i, i + 2));
+                        to.player.addRow(valList.slice(i, i + 2));
                     }
                     break;
                 case ActionType.ITEM_DEL_ROW:
                     for (let i = 0; i < valList[0]; i++) {
-                        to.arena.unshift();
+                        to.player.delRow();
                     }
                     break;
                 case ActionType.ITEM_BOOM:
-                    to.arena.setMatrix(valList);
+                    to.player.boom(valList);
                     break;
                 case ActionType.ITEM_BUFF_DISTURB:
                     to.player.addDisturbBuff(valList[0]);
