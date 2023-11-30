@@ -107,7 +107,9 @@ export class Player {
     addRow(valList:Array<number>) {
         this.arena.push(valList);
         if(this.arena.collide(this)) {
-            this.pos.y--
+            if(this.pos.y > 0) {
+                this.pos.y--
+            }
             this.events.emit("pos", this.pos);
         }
     }
@@ -155,6 +157,7 @@ export class Player {
             (this.matrix[0].length / 2 | 0);
         this.events.emit('pos', this.pos);
         this.events.emit('matrix', this.matrix);
+        // todo：结束的判断需要调整
         if (this.arena.collide(this)) {
             this.events.emit('end', null);
         }

@@ -96,7 +96,7 @@ export class Tetris extends Component {
             row.forEach((value, x) => {
                 if (value != 0) {
                     const [oy, ox] = [y + offset.y, x + offset.x];
-                    if (oy > this.config.h || oy < 0 || ox > this.config.w || ox < 0) {
+                    if (oy > this.config.h-1 || oy < 0 || ox > this.config.w-1 || ox < 0) {
                         return;
                     }
                     this.itemArray[y + offset.y][x + offset.x].getComponent(Sprite).spriteFrame = this.spriteArray[value];
@@ -118,7 +118,7 @@ export class Tetris extends Component {
             row.forEach((value, x) => {
                 if (value != 0) {
                     const [oy, ox] = [y + offset.y, x + offset.x];
-                    if (oy > this.config.h || oy < 0 || ox > this.config.w || ox < 0) {
+                    if (oy > this.config.h-1 || oy < 0 || ox > this.config.w-1 || ox < 0) {
                         return;
                     }
                     this.itemArray[y + offset.y][x + offset.x].getComponent(Sprite).spriteFrame = this.spriteArray[1];
