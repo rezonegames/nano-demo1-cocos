@@ -57,10 +57,10 @@ export interface JoinResp {
   code: ErrorCode;
 }
 
-export interface Cancel {
+export interface Leave {
 }
 
-export interface CancelResp {
+export interface LeaveResp {
   code: ErrorCode;
 }
 
@@ -71,16 +71,16 @@ export interface ReadyResp {
   code: ErrorCode;
 }
 
-export interface LeaveResp {
-  code: ErrorCode;
-}
-
 export interface LoadRes {
   current: number;
 }
 
 export interface LoadResResp {
   code: ErrorCode;
+}
+
+export interface ResumeTable {
+  frameId: number;
 }
 
 /** 在每一个步骤，下发游戏状态 */
@@ -125,13 +125,7 @@ export interface TableInfo {
   res: TableInfo_Res | undefined;
   room: Room | undefined;
   randSeed: number;
-  nextFrameId: number;
-}
-
-/** 断线重连，发送帧数据 */
-export interface TableInfo_Frame {
-  frameId: number;
-  actionList: Action[];
+  frameList: OnFrame[];
 }
 
 /** 桌子上的玩家 */
@@ -140,7 +134,6 @@ export interface TableInfo_Player {
   end: boolean;
   score: number;
   profile: Profile | undefined;
-  frameList: TableInfo_Frame[];
 }
 
 /** 桌子等待 */
@@ -645,19 +638,19 @@ export const JoinResp = {
   },
 };
 
-function createBaseCancel(): Cancel {
+function createBaseLeave(): Leave {
   return {};
 }
 
-export const Cancel = {
-  encode(_: Cancel, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+export const Leave = {
+  encode(_: Leave, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): Cancel {
+  decode(input: _m0.Reader | Uint8Array, length?: number): Leave {
     const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseCancel();
+    const message = createBaseLeave();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -671,22 +664,22 @@ export const Cancel = {
   },
 };
 
-function createBaseCancelResp(): CancelResp {
+function createBaseLeaveResp(): LeaveResp {
   return { code: 0 };
 }
 
-export const CancelResp = {
-  encode(message: CancelResp, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+export const LeaveResp = {
+  encode(message: LeaveResp, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.code !== 0) {
       writer.uint32(8).int32(message.code);
     }
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): CancelResp {
+  decode(input: _m0.Reader | Uint8Array, length?: number): LeaveResp {
     const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseCancelResp();
+    const message = createBaseLeaveResp();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -769,42 +762,6 @@ export const ReadyResp = {
   },
 };
 
-function createBaseLeaveResp(): LeaveResp {
-  return { code: 0 };
-}
-
-export const LeaveResp = {
-  encode(message: LeaveResp, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.code !== 0) {
-      writer.uint32(8).int32(message.code);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): LeaveResp {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseLeaveResp();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 8) {
-            break;
-          }
-
-          message.code = reader.int32() as any;
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-};
-
 function createBaseLoadRes(): LoadRes {
   return { current: 0 };
 }
@@ -866,6 +823,42 @@ export const LoadResResp = {
           }
 
           message.code = reader.int32() as any;
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseResumeTable(): ResumeTable {
+  return { frameId: 0 };
+}
+
+export const ResumeTable = {
+  encode(message: ResumeTable, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.frameId !== 0) {
+      writer.uint32(8).int64(message.frameId);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): ResumeTable {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseResumeTable();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.frameId = longToNumber(reader.int64() as Long);
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -1191,7 +1184,7 @@ function createBaseTableInfo(): TableInfo {
     res: undefined,
     room: undefined,
     randSeed: 0,
-    nextFrameId: 0,
+    frameList: [],
   };
 }
 
@@ -1221,8 +1214,8 @@ export const TableInfo = {
     if (message.randSeed !== 0) {
       writer.uint32(64).int64(message.randSeed);
     }
-    if (message.nextFrameId !== 0) {
-      writer.uint32(72).int64(message.nextFrameId);
+    for (const v of message.frameList) {
+      OnFrame.encode(v!, writer.uint32(74).fork()).ldelim();
     }
     return writer;
   },
@@ -1297,57 +1290,11 @@ export const TableInfo = {
           message.randSeed = longToNumber(reader.int64() as Long);
           continue;
         case 9:
-          if (tag !== 72) {
+          if (tag !== 74) {
             break;
           }
 
-          message.nextFrameId = longToNumber(reader.int64() as Long);
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-};
-
-function createBaseTableInfo_Frame(): TableInfo_Frame {
-  return { frameId: 0, actionList: [] };
-}
-
-export const TableInfo_Frame = {
-  encode(message: TableInfo_Frame, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.frameId !== 0) {
-      writer.uint32(8).int64(message.frameId);
-    }
-    for (const v of message.actionList) {
-      Action.encode(v!, writer.uint32(18).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): TableInfo_Frame {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseTableInfo_Frame();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 8) {
-            break;
-          }
-
-          message.frameId = longToNumber(reader.int64() as Long);
-          continue;
-        case 2:
-          if (tag !== 18) {
-            break;
-          }
-
-          message.actionList.push(Action.decode(reader, reader.uint32()));
+          message.frameList.push(OnFrame.decode(reader, reader.uint32()));
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -1360,7 +1307,7 @@ export const TableInfo_Frame = {
 };
 
 function createBaseTableInfo_Player(): TableInfo_Player {
-  return { teamId: 0, end: false, score: 0, profile: undefined, frameList: [] };
+  return { teamId: 0, end: false, score: 0, profile: undefined };
 }
 
 export const TableInfo_Player = {
@@ -1376,9 +1323,6 @@ export const TableInfo_Player = {
     }
     if (message.profile !== undefined) {
       Profile.encode(message.profile, writer.uint32(34).fork()).ldelim();
-    }
-    for (const v of message.frameList) {
-      TableInfo_Frame.encode(v!, writer.uint32(802).fork()).ldelim();
     }
     return writer;
   },
@@ -1417,13 +1361,6 @@ export const TableInfo_Player = {
           }
 
           message.profile = Profile.decode(reader, reader.uint32());
-          continue;
-        case 100:
-          if (tag !== 802) {
-            break;
-          }
-
-          message.frameList.push(TableInfo_Frame.decode(reader, reader.uint32()));
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {

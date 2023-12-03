@@ -2,7 +2,7 @@ import {_decorator, Label, Node, Button} from "cc";
 import {UIView} from "db://assets/Script/core/ui/UIView";
 import {ListView} from "db://assets/Script/core/components/scrollview/ListView";
 import {oo} from "db://assets/Script/core/oo";
-import {Cancel, CancelResp, GameStateResp, Room, TableInfo_Player} from "db://assets/Script/example/proto/client";
+import {Ready, ReadyResp, Leave, LeaveResp, GameStateResp, Room, TableInfo_Player} from "db://assets/Script/example/proto/client";
 import {CallbackObject} from "db://assets/Script/core/network/NetInterface";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
@@ -131,11 +131,11 @@ export default class UIWaiting extends UIView {
     }
 
     onReady() {
-        let buf = Cancel.encode({}).finish();
+        let buf = Ready.encode({}).finish();
         let respObject: CallbackObject = {
             target: this,
             callback: (cmd: number, data: any) => {
-                let resp = CancelResp.decode(new Uint8Array(data.body));
+                let resp = ReadyResp.decode(new Uint8Array(data.body));
                 oo.log.logNet(resp, "ready返回");
                 if (resp.code == ErrorCode.OK) {
                 }
@@ -145,18 +145,18 @@ export default class UIWaiting extends UIView {
     }
 
     onCancel() {
-        let buf = Cancel.encode({}).finish();
+        let buf = Leave.encode({}).finish();
         let respObject: CallbackObject = {
             target: this,
             callback: (cmd: number, data: any) => {
-                let resp = CancelResp.decode(new Uint8Array(data.body));
+                let resp = LeaveResp.decode(new Uint8Array(data.body));
                 oo.log.logNet(resp, "ready返回");
                 if (resp.code == ErrorCode.OK) {
                     uiManager.close();
                 }
             }
         }
-        channel.gameReqest("r.cancel", buf, respObject);
+        channel.gameReqest("r.leave", buf, respObject);
     }
 }
 

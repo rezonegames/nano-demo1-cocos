@@ -9,7 +9,13 @@ import {
 } from "db://assets/Script/core/network/NetInterface";
 import {NetNode} from "db://assets/Script/core/network/NetNode";
 import {oo} from "db://assets/Script/core/oo";
-import {GameStateResp, LoginToGame, LoginToGameResp, OnFrame} from "db://assets/Script/example/proto/client";
+import {
+    GameStateResp,
+    LoginToGame,
+    LoginToGameResp,
+    OnFrame,
+    ResumeTable
+} from "db://assets/Script/example/proto/client";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
 import {Message} from "db://assets/Script/example/nano/message";
 import {WebSock} from "db://assets/Script/core/network/WebSock";
@@ -18,6 +24,7 @@ import {GameState, TableState} from "db://assets/Script/example/proto/consts";
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
 import {UIID} from "db://assets/Script/example/UIExample";
 import {EventMgr} from "db://assets/Script/core/common/EventManager";
+import UIControl from "db://assets/Script/example/uiviews/UIControl";
 
 enum NetChannelType {
     /** 游戏服务器 */
@@ -158,7 +165,7 @@ class NetNodeGame extends NetNode {
 
         let buf = LoginToGame.encode({userId: uid}).finish();
         let rspObject: CallbackObject = {
-            target: null,
+            target: this,
             callback: (cmd: number, data: any) => {
                 let resp = LoginToGameResp.decode(new Uint8Array(data.body));
                 oo.log.logNet(resp, "登录游戏账号");
@@ -166,12 +173,13 @@ class NetNodeGame extends NetNode {
                     // 重连，不去切换ui
                     if (this.isReconnecting) {
                         this.isReconnecting = false;
-                        return;
                     }
-                    // todo：如果tableId不为空，resumeTable，进入游戏
+                    // 如果tableId不为空，resumeTable，进入游戏
                     if (resp.tableId != "") {
+                        this.resumeTable();
                         return;
                     }
+                    //
                     uiManager.replace(UIID.UIHall, resp.roomList);
                 } else {
                     oo.log.logNet(resp, "登录失败");
@@ -179,6 +187,28 @@ class NetNodeGame extends NetNode {
             }
         }
         this.request1("g.login", buf, rspObject);
+    }
+
+    resumeTable() {
+        let frameId = 0;
+        let control = uiManager.getUI(UIID.UIControl) as UIControl;
+        if(control) {
+            frameId = control.curFrame;
+        }
+
+        let buf = ResumeTable.encode({frameId:frameId}).finish();
+        let rspObject: CallbackObject = {
+            target: this,
+            callback: (cmd: number, data: any) => {
+                let resp = GameStateResp.decode(new Uint8Array(data.body));
+                if(!control) {
+                    uiManager.open(UIID.UIControl, resp.tableInfo);
+                } else {
+                    control.resumeTable(resp.tableInfo);
+                }
+            }
+        }
+        this.request1("r.resumetable", buf, rspObject);
     }
 
     encode(reqId: number, route: string, data: any): Uint8Array {

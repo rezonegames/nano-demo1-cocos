@@ -29,17 +29,15 @@ export default class UIControl extends UIView {
     @property(Prefab)
     tetris: Prefab
 
-    // tetris管理器
-    tetrisManager: { [key: number]: Tetris } = {};
-
-    onDestroy() {
-        super.onDestroy();
-        EventMgr.removeEventListener("onFrame", this.onFrame, this);
-        oo.log.logView("UIControl.onDestroy");
-    }
-
     @property([Button])
     buttonArray: Button[]
+
+    tetrisManager: { [key: number]: Tetris } = {};
+
+    // 帧数据
+    curFrame: number = 0;
+    frameList: OnFrame[] = [];
+    isResume: boolean = false;
 
     public onOpen(fromUI: number, ...args) {
         super.onOpen(fromUI, ...args);
@@ -73,9 +71,16 @@ export default class UIControl extends UIView {
                         }
                         this.tetrisManager[uid] = t;
                     }
-                    oo.log.logView("", "res.ok");
-                    let buf = LoadRes.encode({current: 100}).finish();
-                    channel.gameNotify("r.loadres", buf);
+                    if (tableInfo.frameList.length > 0) {
+                        setTimeout(() => {
+                            this.resumeTable(tableInfo);
+                        }, 1000);
+                    } else {
+                        oo.log.logView("", "res.ok");
+                        let buf = LoadRes.encode({current: 100}).finish();
+                        channel.gameNotify("r.loadres", buf);
+                    }
+
                 });
                 break
             case "2":
@@ -83,8 +88,12 @@ export default class UIControl extends UIView {
             default:
                 break
         }
+    }
 
-
+    onDestroy() {
+        super.onDestroy();
+        EventMgr.removeEventListener("onFrame", this.onFrame, this);
+        oo.log.logView("UIControl.onDestroy");
     }
 
     initTetris(player: TableInfo_Player, tetris: Tetris) {
@@ -203,9 +212,26 @@ export default class UIControl extends UIView {
         });
     }
 
-    public onFrame(event: string, args: any) {
+    onFrame(event: string, args: any) {
         let frame = args as OnFrame;
-        // oo.log.logView(frame, "onFrame");
+        this.frameList.push(frame);
+    }
+
+    // 可以控制速度
+    update(deltaTime: number) {
+        if (this.curFrame < this.frameList.length) {
+            let frame = this.frameList[this.curFrame];
+            this.process(frame);
+            this.curFrame++;
+        }
+    }
+
+    resumeTable(tableInfo: TableInfo) {
+        let frameList = tableInfo?.frameList;
+        this.frameList = this.frameList.concat(frameList);
+    }
+
+    process(frame: OnFrame) {
         if (frame.frameId == 0) {
             for (const [uid, t] of Object.entries(this.tetrisManager)) {
                 t.player.pieceList = frame.pieceList;
@@ -219,6 +245,8 @@ export default class UIControl extends UIView {
                 }
             })
         }
+        // this.frameList.push(frame);
+        // oo.log.logView(frame.frameId, "process");
     }
 
     touch(val: number, touchCounter: number, offset: number = 0): number[] {
