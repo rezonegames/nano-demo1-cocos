@@ -10,7 +10,7 @@ import {
 import {NetNode} from "db://assets/Script/core/network/NetNode";
 import {oo} from "db://assets/Script/core/oo";
 import {
-    GameStateResp,
+    GameStateResp, LoadRes,
     LoginToGame,
     LoginToGameResp,
     OnFrame, OnFrameList,
@@ -203,6 +203,10 @@ class NetNodeGame extends NetNode {
                 let resp = GameStateResp.decode(new Uint8Array(data.body));
                 if(!control) {
                     uiManager.open(UIID.UIControl, resp.tableInfo);
+                } else {
+                    // 网络不稳定，直接res ok
+                    let buf = LoadRes.encode({current: 100}).finish();
+                    channel.gameNotify("r.loadres", buf);
                 }
             }
         }
