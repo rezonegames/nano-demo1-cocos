@@ -4,7 +4,7 @@ import {
     Action,
     LoadRes,
     OnFrame,
-    OnFrame_Player,
+    OnFrame_Player, OnFrameList,
     Room,
     TableInfo,
     TableInfo_Player,
@@ -71,15 +71,10 @@ export default class UIControl extends UIView {
                         }
                         this.tetrisManager[uid] = t;
                     }
-                    if (tableInfo.frameList.length > 0) {
-                        setTimeout(() => {
-                            this.resumeTable(tableInfo);
-                        }, 1000);
-                    } else {
-                        oo.log.logView("", "res.ok");
-                        let buf = LoadRes.encode({current: 100}).finish();
-                        channel.gameNotify("r.loadres", buf);
-                    }
+
+                    oo.log.logView("", "res.ok");
+                    let buf = LoadRes.encode({current: 100}).finish();
+                    channel.gameNotify("r.loadres", buf);
 
                 });
                 break
@@ -213,8 +208,8 @@ export default class UIControl extends UIView {
     }
 
     onFrame(event: string, args: any) {
-        let frame = args as OnFrame;
-        this.frameList.push(frame);
+        let msg = args as OnFrameList;
+        this.frameList = this.frameList.concat(msg.frameList);
     }
 
     // 可以控制速度
@@ -224,11 +219,6 @@ export default class UIControl extends UIView {
             this.process(frame);
             this.curFrame++;
         }
-    }
-
-    resumeTable(tableInfo: TableInfo) {
-        let frameList = tableInfo?.frameList;
-        this.frameList = this.frameList.concat(frameList);
     }
 
     process(frame: OnFrame) {

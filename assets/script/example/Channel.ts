@@ -13,7 +13,7 @@ import {
     GameStateResp,
     LoginToGame,
     LoginToGameResp,
-    OnFrame,
+    OnFrame, OnFrameList,
     ResumeTable
 } from "db://assets/Script/example/proto/client";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
@@ -203,8 +203,6 @@ class NetNodeGame extends NetNode {
                 let resp = GameStateResp.decode(new Uint8Array(data.body));
                 if(!control) {
                     uiManager.open(UIID.UIControl, resp.tableInfo);
-                } else {
-                    control.resumeTable(resp.tableInfo);
                 }
             }
         }
@@ -314,7 +312,7 @@ export class NetChannelManager {
 
         // 游戏内状态同步
         this.gameAddListener("onFrame", (cmd, data: any) => {
-            let resp = OnFrame.decode(new Uint8Array(data.body));
+            let resp = OnFrameList.decode(new Uint8Array(data.body));
             EventMgr.raiseEvent("onFrame", resp);
         }, this);
     }

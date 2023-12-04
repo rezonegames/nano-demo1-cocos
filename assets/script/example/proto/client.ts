@@ -115,6 +115,10 @@ export interface OnFrame_Player {
   actionList: Action[];
 }
 
+export interface OnFrameList {
+  frameList: OnFrame[];
+}
+
 /** 下发桌子信息 */
 export interface TableInfo {
   tableId: string;
@@ -125,7 +129,6 @@ export interface TableInfo {
   res: TableInfo_Res | undefined;
   room: Room | undefined;
   randSeed: number;
-  frameList: OnFrame[];
 }
 
 /** 桌子上的玩家 */
@@ -1174,6 +1177,42 @@ export const OnFrame_Player = {
   },
 };
 
+function createBaseOnFrameList(): OnFrameList {
+  return { frameList: [] };
+}
+
+export const OnFrameList = {
+  encode(message: OnFrameList, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.frameList) {
+      OnFrame.encode(v!, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): OnFrameList {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOnFrameList();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.frameList.push(OnFrame.decode(reader, reader.uint32()));
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
 function createBaseTableInfo(): TableInfo {
   return {
     tableId: "",
@@ -1184,7 +1223,6 @@ function createBaseTableInfo(): TableInfo {
     res: undefined,
     room: undefined,
     randSeed: 0,
-    frameList: [],
   };
 }
 
@@ -1213,9 +1251,6 @@ export const TableInfo = {
     }
     if (message.randSeed !== 0) {
       writer.uint32(64).int64(message.randSeed);
-    }
-    for (const v of message.frameList) {
-      OnFrame.encode(v!, writer.uint32(74).fork()).ldelim();
     }
     return writer;
   },
@@ -1288,13 +1323,6 @@ export const TableInfo = {
           }
 
           message.randSeed = longToNumber(reader.int64() as Long);
-          continue;
-        case 9:
-          if (tag !== 74) {
-            break;
-          }
-
-          message.frameList.push(OnFrame.decode(reader, reader.uint32()));
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
