@@ -12,6 +12,7 @@
     "ws": "^8.8.1",
     "protobufjs": "^7.2.5",
     "long": "^5.2.3",
-    "crypto-es": "^2.1.0"
+    "crypto-es": "^2.1.0",
+    "seedrandom": "^3.0.5"
   }
 }

@@ -96,7 +96,7 @@ export class Player {
         }, second * 1000)
     }
 
-    boom(valList:Array<number>) {
+    boom(valList: Array<number>) {
         this.arena.setMatrix(valList)
     }
 
@@ -104,10 +104,10 @@ export class Player {
         this.arena.unshift();
     }
 
-    addRow(valList:Array<number>) {
+    addRow(valList: Array<number>) {
         this.arena.push(valList);
-        if(this.arena.collide(this)) {
-            if(this.pos.y > 0) {
+        if (this.arena.collide(this)) {
+            if (this.pos.y > 0) {
                 this.pos.y--
             }
             this.events.emit("pos", this.pos);
@@ -120,14 +120,12 @@ export class Player {
             return;
         }
         this.combo++;
-        if (this.combo >= 2) {
-            this.events.emit('combo', this.combo);
-        }
         if (score == 70) {
-            this.events.emit('combo_3', 0);
-        }
-        if (score == 150) {
-            this.events.emit('combo_4', 0);
+            this.events.emit('combo_3', 4);
+        } else if (score == 150) {
+            this.events.emit('combo_4', 6);
+        } else if (this.combo >= 2) {
+            this.events.emit('combo', 2);
         }
     }
 
@@ -147,7 +145,8 @@ export class Player {
 
     reset() {
         const pieces = 'ILJOTSZ';
-        this.matrix = this.createPiece(pieces[this.pieceList[this.index]]);
+        let index = this.pieceList[this.index];
+        this.matrix = this.createPiece(pieces[index]);
         this.index++;
         if (this.index > this.pieceList.length - 1) {
             this.index = 0;

@@ -53,15 +53,11 @@ export enum ActionType {
   ROTATE = 3,
   DROP = 4,
   QUICK_DROP = 5,
-  /** COMBO - 连击 */
-  COMBO = 8,
-  COMBO_4 = 9,
-  COMBO_3 = 10,
   /** ITEM_BOOM - 道具 */
-  ITEM_BOOM = 11,
-  ITEM_BUFF_DISTURB = 12,
-  ITEM_ADD_ROW = 13,
-  ITEM_DEL_ROW = 14,
+  ITEM_BOOM = 6,
+  ITEM_BUFF_DISTURB = 7,
+  ITEM_ADD_ROW = 8,
+  ITEM_DEL_ROW = 9,
   END = 100,
   UNRECOGNIZED = -1,
 }

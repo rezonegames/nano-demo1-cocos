@@ -1,10 +1,7 @@
+import seedrandom from "seedrandom";
+
 export class RandomManager {
     private static _instance: RandomManager;
-
-    /** 是否运行在客户端环境 */
-    isClient: boolean = true;
-    /** 是否为全局伪随机 */
-    isGlobal: boolean = false;
 
     private random: any = null;
 
@@ -18,30 +15,12 @@ export class RandomManager {
     }
 
     private getRandom(): number {
-        return this.isGlobal ? Math.random() : this.random();
+        return this.random();
     }
 
     /** 设置随机种子 */
     setSeed(seed: number) {
-        if (this.isClient) {
-            //注：seedrandom.min.js文件在Cocos Creator中导入为插件生效
-            //@ts-ignore
-            if (Math.seedrandom) {
-                if (this.isGlobal)
-                    //@ts-ignore
-                    new Math.seedrandom(seed, { global: true });
-                else
-                    //@ts-ignore
-                    this.random = new Math.seedrandom(seed);
-            }
-        }
-        else {
-            var seedrandom = require('seedrandom');
-            if (this.isGlobal)
-                new seedrandom(seed, { global: true });
-            else
-                this.random = new seedrandom(seed);
-        }
+        this.random = new seedrandom(seed);
     }
 
     /**

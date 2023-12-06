@@ -47,7 +47,6 @@ export default class UIControl extends UIView {
         let room: Room = tableInfo.room;
         this.title.string = room.name
         oo.random.isClient = true;
-        oo.random.isGlobal = true;
         oo.random.setSeed(tableInfo.randSeed);
         // 初始化
         switch (room.roomId) {
@@ -108,22 +107,18 @@ export default class UIControl extends UIView {
                     case "matrix":
                         tetris.draw();
                         break;
+
+                    // todo: random问题，保证各个客户端random结果一致
                     case "combo":
-                        if (from == 0) {
-                            let valList = oo.random.getRandomByMinMaxList(0, 11, 2);
-                            this.serialize(ActionType.COMBO, valList);
-                        }
-                        break;
                     case "combo_3":
-                        if (from == 0) {
-                            let valList = oo.random.getRandomByMinMaxList(0, 11, 4);
-                            this.serialize(ActionType.COMBO_3, valList);
-                        }
-                        break;
                     case "combo_4":
-                        if (from == 0) {
-                            let valList = oo.random.getRandomByMinMaxList(0, 11, 6);
-                            this.serialize(ActionType.COMBO_3, valList);
+                        for (const [_, t] of Object.entries(this.tetrisManager)) {
+                            if (t.player.teamId !== tetris.player.teamId) {
+                                let valList = oo.random.getRandomByMinMaxList(0, 11, val);
+                                for (let i = 0; i < valList.length; i += 2) {
+                                    t.player.addRow(valList.slice(i, i + 2));
+                                }
+                            }
                         }
                         break
                     default:
@@ -171,18 +166,6 @@ export default class UIControl extends UIView {
                 case ActionType.ROTATE:
                     for (let i = 0; i < valList.length; i++) {
                         tetris.player.rotate(valList[i]);
-                    }
-                    break;
-                // 队伍不一样，从下往上加
-                case ActionType.COMBO:
-                case ActionType.COMBO_3:
-                case ActionType.COMBO_4:
-                    for (const [_, t] of Object.entries(this.tetrisManager)) {
-                        if (t.player.teamId !== tetris.player.teamId) {
-                            for (let i = 0; i < valList.length; i += 2) {
-                                t.player.addRow(valList.slice(i, i + 2));
-                            }
-                        }
                     }
                     break;
                 case ActionType.ITEM_ADD_ROW:
@@ -235,8 +218,6 @@ export default class UIControl extends UIView {
                 }
             })
         }
-        // this.frameList.push(frame);
-        // oo.log.logView(frame.frameId, "process");
     }
 
     touch(val: number, touchCounter: number, offset: number = 0): number[] {
@@ -252,7 +233,7 @@ export default class UIControl extends UIView {
         } else if (touchCounter >= 8 && touchCounter < 15) {
             valList.push(val, val, val)
         } else {
-            for (let i = this.my.player.pos.x - offset; i >= 0; i--) {
+            for (let i = offset; i >= 0; i--) {
                 valList.push(val)
             }
         }
@@ -272,7 +253,7 @@ export default class UIControl extends UIView {
     }
 
     onDrop(touchCounter: number, customEventData?: any) {
-        this.serialize(ActionType.DROP, this.touch(1, touchCounter, 1));
+        this.serialize(ActionType.DROP, this.touch(1, touchCounter, this.my.player.pos.y -1));
     }
 
     onQuick() {

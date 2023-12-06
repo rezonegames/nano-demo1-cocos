@@ -109,7 +109,7 @@ export class HttpRequest {
             url,
             buff
         };
-        urls[url] = xhr;
+        // urls[url] = xhr;
         this.callback(xhr, url, data, completeCallback, errorCallback, timeout);
         xhr.send(buff);
     }
