@@ -10,16 +10,17 @@ import {
 import {NetNode} from "db://assets/Script/core/network/NetNode";
 import {oo} from "db://assets/Script/core/oo";
 import {
-    GameStateResp, LoadRes,
+    GameStateResp,
+    LoadRes,
     LoginToGame,
     LoginToGameResp,
-    OnFrame, OnFrameList,
+    OnFrameList, ResumeRoom,
     ResumeTable
 } from "db://assets/Script/example/proto/client";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
 import {Message} from "db://assets/Script/example/nano/message";
 import {WebSock} from "db://assets/Script/core/network/WebSock";
-import {Label, view, director, Node} from "cc";
+import {director, Label, Node, view} from "cc";
 import {GameState, TableState} from "db://assets/Script/example/proto/consts";
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
 import {UIID} from "db://assets/Script/example/UIExample";
@@ -179,6 +180,10 @@ class NetNodeGame extends NetNode {
                         this.resumeTable();
                         return;
                     }
+                    if(resp.roomId != "") {
+                        this.resumeRoom();
+                        return;
+                    }
                     //
                     uiManager.replace(UIID.UIHall, resp.roomList);
                 } else {
@@ -187,6 +192,24 @@ class NetNodeGame extends NetNode {
             }
         }
         this.request1("g.login", buf, rspObject);
+    }
+
+    resumeRoom() {
+        let buf = ResumeRoom.encode({}).finish();
+        let rspObject: CallbackObject = {
+            target: this,
+            callback: (cmd: number, data: any) => {
+                let resp = GameStateResp.decode(new Uint8Array(data.body));
+                switch (resp.code) {
+                    case ErrorCode.OK:
+                        uiManager.replace(UIID.UIHall, resp.roomList);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        this.request1("r.resumeroom", buf, rspObject);
     }
 
     resumeTable() {
@@ -201,12 +224,22 @@ class NetNodeGame extends NetNode {
             target: this,
             callback: (cmd: number, data: any) => {
                 let resp = GameStateResp.decode(new Uint8Array(data.body));
-                if(!control) {
-                    uiManager.open(UIID.UIControl, resp.tableInfo);
-                } else {
-                    // 网络不稳定，直接res ok
-                    let buf = LoadRes.encode({current: 100}).finish();
-                    channel.gameNotify("r.loadres", buf);
+
+                switch (resp.code) {
+                    case ErrorCode.TableDismissError:
+                        uiManager.replace(UIID.UIHall, resp.roomList);
+                        break;
+                    case ErrorCode.OK:
+                        if(!control) {
+                            uiManager.replace(UIID.UIControl, resp.tableInfo);
+                        } else {
+                            // 网络不稳定，直接res ok
+                            let buf = LoadRes.encode({current: 100}).finish();
+                            channel.gameNotify("r.loadres", buf);
+                        }
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -303,7 +336,7 @@ export class NetChannelManager {
                         case TableState.GAMING:
                             break;
                         case TableState.SETTLEMENT:
-                            uiManager.replace(UIID.UISettlement, resp);
+                            uiManager.open(UIID.UISettlement, resp);
                             break;
                     }
                     break

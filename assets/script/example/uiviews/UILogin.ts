@@ -24,7 +24,6 @@ export default class UILogin extends UIView {
         oo.http.server = `http://192.168.8.76:8000`;
         // oo.http.server = `http://192.168.3.23:8000`;
         // oo.http.server = `http://127.0.0.1:8000`;
-
         channel.gameClose();
         channel.gameCreate();
     }
@@ -77,7 +76,7 @@ export default class UILogin extends UIView {
     }
 
     onConnect() {
-        // uiManager.replace(UIID.UIHall);
+        channel.gameClose();
         channel.gameConnect(this.resp.addr);
     }
 }

@@ -16,6 +16,7 @@ export class Player {
     index: number;
     combo: number; // 连击
     disturbBuff: boolean; // 干扰buff
+    pieces
 
     constructor(arena: Arena, uid: number, teamId: number) {
         this.pos = {x: 0, y: 0};
@@ -25,6 +26,7 @@ export class Player {
         this.index = 0;
         this.combo = 0;
         this.teamId = teamId;
+        this.pieces = 'ILJOTSZ';
     }
 
     createPiece(type) {
@@ -143,10 +145,17 @@ export class Player {
         this.events.emit('pos', this.pos);
     }
 
+    getNextPiece() {
+        let i = this.index + 1;
+        if (i > this.pieceList.length - 1) {
+            i = 0;
+        }
+        return this.createPiece(this.pieces[i]);
+    }
+
     reset() {
-        const pieces = 'ILJOTSZ';
         let index = this.pieceList[this.index];
-        this.matrix = this.createPiece(pieces[index]);
+        this.matrix = this.createPiece(this.pieces[index]);
         this.index++;
         if (this.index > this.pieceList.length - 1) {
             this.index = 0;

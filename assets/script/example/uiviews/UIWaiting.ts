@@ -87,6 +87,7 @@ export default class UIWaiting extends UIView {
                         // 更新ui，打开游戏界面
                         this.countDown.string = `倒计时：${countDown}`;
                         if (countDown == 1 && !(uid in readys)) {
+                            uiManager.close();
                             return;
                         }
 

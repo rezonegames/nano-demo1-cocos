@@ -58,6 +58,8 @@ export interface JoinResp {
 }
 
 export interface Leave {
+  roomId: string;
+  force: boolean;
 }
 
 export interface LeaveResp {
@@ -83,6 +85,9 @@ export interface ResumeTable {
   frameId: number;
 }
 
+export interface ResumeRoom {
+}
+
 /** 在每一个步骤，下发游戏状态 */
 export interface GameStateResp {
   code: ErrorCode;
@@ -90,6 +95,7 @@ export interface GameStateResp {
   state: GameState;
   tableInfo: TableInfo | undefined;
   roomList: Room[];
+  roomId: string;
 }
 
 export interface Action {
@@ -642,11 +648,17 @@ export const JoinResp = {
 };
 
 function createBaseLeave(): Leave {
-  return {};
+  return { roomId: "", force: false };
 }
 
 export const Leave = {
-  encode(_: Leave, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+  encode(message: Leave, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.roomId !== "") {
+      writer.uint32(10).string(message.roomId);
+    }
+    if (message.force === true) {
+      writer.uint32(16).bool(message.force);
+    }
     return writer;
   },
 
@@ -657,6 +669,20 @@ export const Leave = {
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.roomId = reader.string();
+          continue;
+        case 2:
+          if (tag !== 16) {
+            break;
+          }
+
+          message.force = reader.bool();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -873,8 +899,34 @@ export const ResumeTable = {
   },
 };
 
+function createBaseResumeRoom(): ResumeRoom {
+  return {};
+}
+
+export const ResumeRoom = {
+  encode(_: ResumeRoom, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): ResumeRoom {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseResumeRoom();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
 function createBaseGameStateResp(): GameStateResp {
-  return { code: 0, errMsg: "", state: 0, tableInfo: undefined, roomList: [] };
+  return { code: 0, errMsg: "", state: 0, tableInfo: undefined, roomList: [], roomId: "" };
 }
 
 export const GameStateResp = {
@@ -893,6 +945,9 @@ export const GameStateResp = {
     }
     for (const v of message.roomList) {
       Room.encode(v!, writer.uint32(50).fork()).ldelim();
+    }
+    if (message.roomId !== "") {
+      writer.uint32(58).string(message.roomId);
     }
     return writer;
   },
@@ -938,6 +993,13 @@ export const GameStateResp = {
           }
 
           message.roomList.push(Room.decode(reader, reader.uint32()));
+          continue;
+        case 7:
+          if (tag !== 58) {
+            break;
+          }
+
+          message.roomId = reader.string();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {

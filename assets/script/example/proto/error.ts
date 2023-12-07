@@ -10,5 +10,8 @@ export enum ErrorCode {
   ParameterError = 3,
   AccountIdError = 4,
   AlreadyInRoom = 5,
+  TableDismissError = 6,
+  RoomDismissError = 7,
+  JoinError = 8,
   UNRECOGNIZED = -1,
 }
