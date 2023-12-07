@@ -1,11 +1,9 @@
-import {UIID} from "../UIExample";
 import {_decorator, Label, Node,} from "cc";
 import {AccountLoginReq, AccountLoginResp} from "db://assets/Script/example/proto/web";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
 import {AccountType} from "db://assets/Script/example/proto/consts";
 import {UIView} from "db://assets/Script/core/ui/UIView";
 import {oo} from "db://assets/Script/core/oo";
-import {uiManager} from "db://assets/Script/core/ui/UIManager";
 import {channel} from "db://assets/Script/example/Channel";
 
 const {ccclass, property} = _decorator;

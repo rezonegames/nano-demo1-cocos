@@ -45,8 +45,8 @@ export class HttpRequest {
         }
 
         xhr.onloadend = (a) => {
+            this.deleteCache(url);
             if (xhr.status == 500) {
-                this.deleteCache(url);
                 if (errorCallback == null) return;
                 data.event = HttpEvent.NO_NETWORK;          // 断网
                 if (errorCallback) errorCallback(data);
@@ -65,8 +65,8 @@ export class HttpRequest {
         };
 
         xhr.onreadystatechange = () => {
-            if (xhr.readyState != 4) return;
             this.deleteCache(url);
+            if (xhr.readyState != 4) return;
             if (xhr.status == 200) {
                 const responseBuffer = new Uint8Array(xhr.response);
                 if (completeCallback) {
@@ -96,10 +96,10 @@ export class HttpRequest {
             url = this.server + name;
         }
 
-        if (urls[url] != null) {
-            warn(`地址【${url}】已正在请求中，不能重复请求`);
-            return;
-        }
+        // if (urls[url] != null) {
+        //     warn(`地址【${url}】已正在请求中，不能重复请求`);
+        //     return;
+        // }
 
         let xhr = new XMLHttpRequest();
         xhr.open("POST", url);
@@ -109,7 +109,7 @@ export class HttpRequest {
             url,
             buff
         };
-        // urls[url] = xhr;
+        urls[url] = xhr;
         this.callback(xhr, url, data, completeCallback, errorCallback, timeout);
         xhr.send(buff);
     }

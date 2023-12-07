@@ -46,7 +46,6 @@ export default class UIControl extends UIView {
         let tableInfo = args[0] as TableInfo;
         let room: Room = tableInfo.room;
         this.title.string = room.name
-        oo.random.isClient = true;
         oo.random.setSeed(tableInfo.randSeed);
         // 初始化
         switch (room.roomId) {

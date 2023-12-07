@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {Component, instantiate, Node, NodePool, ScrollView, UITransform, Vec3, _decorator} from 'cc';
 
 const {ccclass, property} = _decorator;
