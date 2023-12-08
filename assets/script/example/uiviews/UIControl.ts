@@ -92,7 +92,7 @@ export default class UIControl extends UIView {
     initTetris(player: TableInfo_Player, tetris: Tetris) {
         tetris.onAdded({uid: player.profile?.userId, draw0: false, teamId: player.teamId});
         // 玩家的所有事件
-        ['pos', 'end', 'matrix', 'score', 'combo', 'combo_3', 'combo_4'].forEach(key => {
+        ['nextPiece', 'pos', 'end', 'matrix', 'score', 'combo', 'combo_3', 'combo_4'].forEach(key => {
             let from = oo.storage.getUser() == tetris.player.uid ? 0 : tetris.player.uid;
             tetris.player.events.on(key, (val) => {
                 switch (key) {
@@ -105,6 +105,9 @@ export default class UIControl extends UIView {
                     case "pos":
                     case "matrix":
                         tetris.draw();
+                        break;
+                    case "nextPiece":
+                        tetris.drawNextMatrix();
                         break;
 
                     // todo: random问题，保证各个客户端random结果一致

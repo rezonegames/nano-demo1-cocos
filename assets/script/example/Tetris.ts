@@ -1,4 +1,4 @@
-import {_decorator, Component, instantiate, Label, Node, Prefab, Sprite, SpriteFrame, Widget} from 'cc';
+import {_decorator, Component, instantiate, Label, Node, Prefab, Sprite, SpriteFrame, Widget, UITransform} from 'cc';
 import {Arena} from "db://assets/Script/example/Arena";
 import {Player} from "db://assets/Script/example/Player";
 
@@ -37,6 +37,14 @@ export class Tetris extends Component {
     @property(Label)
     score: Label
 
+    // 下一个方块
+    @property(Node)
+    nextArray: Node[][] = [];
+
+    @property(Node)
+    next: Node
+    nextMatrix: Array<number>[]
+
     // tetris属性
     config: { w: number, h: number, bw: number, bh: number } = {
         w: 12,
@@ -65,10 +73,30 @@ export class Tetris extends Component {
             row.forEach((value, x) => {
                 let item: Node = instantiate(this.block);
                 this.canvas.addChild(item);
-                item.setPosition(-w / 2 + x * bw + bw / 2, h / 2 - (y + 1) * this.config.bh + bh / 2);
+                item.setPosition(-w / 2 + x * bw + bw / 2, h / 2 - (y + 1) * bh + bh / 2);
                 this.itemArray[y][x] = item;
             })
         });
+
+        // 下一个
+        this.nextMatrix = [
+            [0, 5, 0, 0],
+            [0, 5, 0, 0],
+            [0, 5, 0, 0],
+            [0, 5, 0, 0],
+        ];
+        const [w1, h1, bw1, bh1] = [this.config.bw/2*4+4,this.config.bh/2*4+4,this.config.bw/2,this.config.bh/2]
+        this.nextMatrix.forEach((row, y) => {
+            this.nextArray[y] = []
+            row.forEach((value, x) => {
+                let item: Node = instantiate(this.block);
+                item.getComponent(UITransform).setContentSize(bw1, bh1)
+                this.next.addChild(item);
+                item.setPosition(-w1 / 2 + x * bw1 + bw1 / 2, h1 / 2 - (y + 1) * bh1 + bh1 / 2);
+                this.nextArray[y][x] = item;
+            })
+        });
+
         this.updateScore(0);
     }
 
@@ -96,7 +124,7 @@ export class Tetris extends Component {
             row.forEach((value, x) => {
                 if (value != 0) {
                     const [oy, ox] = [y + offset.y, x + offset.x];
-                    if (oy > this.config.h-1 || oy < 0 || ox > this.config.w-1 || ox < 0) {
+                    if (oy > this.config.h - 1 || oy < 0 || ox > this.config.w - 1 || ox < 0) {
                         return;
                     }
                     this.itemArray[y + offset.y][x + offset.x].getComponent(Sprite).spriteFrame = this.spriteArray[value];
@@ -118,10 +146,27 @@ export class Tetris extends Component {
             row.forEach((value, x) => {
                 if (value != 0) {
                     const [oy, ox] = [y + offset.y, x + offset.x];
-                    if (oy > this.config.h-1 || oy < 0 || ox > this.config.w-1 || ox < 0) {
+                    if (oy > this.config.h - 1 || oy < 0 || ox > this.config.w - 1 || ox < 0) {
                         return;
                     }
                     this.itemArray[y + offset.y][x + offset.x].getComponent(Sprite).spriteFrame = this.spriteArray[1];
+                }
+            });
+        });
+    }
+
+    // 画下一个
+    drawNextMatrix() {
+        this.nextMatrix.forEach((row, y) => {
+            row.forEach((value, x) => {
+                this.nextArray[y][x].getComponent(Sprite).spriteFrame = null;
+            });
+        });
+        const matrix = this.player.getNextPiece();
+        matrix.forEach((row, y) => {
+            row.forEach((value, x) => {
+                if (value != 0) {
+                    this.nextArray[y][x].getComponent(Sprite).spriteFrame = this.spriteArray[value];
                 }
             });
         });

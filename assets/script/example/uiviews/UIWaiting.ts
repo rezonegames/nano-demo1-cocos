@@ -2,7 +2,15 @@ import {_decorator, Label, Node, Button} from "cc";
 import {UIView} from "db://assets/Script/core/ui/UIView";
 import {ListView} from "db://assets/Script/core/components/scrollview/ListView";
 import {oo} from "db://assets/Script/core/oo";
-import {Ready, ReadyResp, Leave, LeaveResp, GameStateResp, Room, TableInfo_Player} from "db://assets/Script/example/proto/client";
+import {
+    Ready,
+    ReadyResp,
+    Leave,
+    LeaveResp,
+    GameStateResp,
+    Room,
+    TableInfo_Player
+} from "db://assets/Script/example/proto/client";
 import {CallbackObject} from "db://assets/Script/core/network/NetInterface";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
@@ -146,7 +154,7 @@ export default class UIWaiting extends UIView {
     }
 
     onCancel() {
-        let buf = Leave.encode({}).finish();
+        let buf = Leave.encode({roomId: "", force: false}).finish();
         let respObject: CallbackObject = {
             target: this,
             callback: (cmd: number, data: any) => {

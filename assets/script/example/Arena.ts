@@ -4,7 +4,6 @@ import {Player} from "db://assets/Script/example/Player";
 export class Arena {
 
     matrix: Array<number>[]
-
     events = new EventTarget;
 
     constructor(w: number, h: number) {

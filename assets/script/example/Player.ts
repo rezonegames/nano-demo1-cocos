@@ -146,11 +146,8 @@ export class Player {
     }
 
     getNextPiece() {
-        let i = this.index + 1;
-        if (i > this.pieceList.length - 1) {
-            i = 0;
-        }
-        return this.createPiece(this.pieces[i]);
+        let index = this.pieceList[this.index];
+        return this.createPiece(this.pieces[index]);
     }
 
     reset() {
@@ -164,7 +161,7 @@ export class Player {
         this.pos.x = (this.arena.matrix[0].length / 2 | 0) -
             (this.matrix[0].length / 2 | 0);
         this.events.emit('pos', this.pos);
-        this.events.emit('matrix', this.matrix);
+        this.events.emit('nextPiece', 0);
         // todo：结束的判断需要调整
         if (this.arena.collide(this)) {
             this.events.emit('end', null);
