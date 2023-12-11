@@ -1,7 +1,7 @@
 /* eslint-disable */
 import Long from "long";
 import _m0 from "protobufjs/minimal.js";
-import { ActionType, GameState, TableState } from "./consts.js";
+import { ActionType, GameState, ItemType, TableState } from "./consts.js";
 import { ErrorCode } from "./error.js";
 
 export const protobufPackage = "proto";
@@ -17,10 +17,15 @@ export interface LoginToGame {
   userId: number;
 }
 
+export interface Item {
+  key: ItemType;
+  val: number;
+}
+
 export interface Profile {
   name: string;
-  coin: number;
   userId: number;
+  itemList: Item[];
   updatedAt: number;
 }
 
@@ -135,6 +140,8 @@ export interface TableInfo {
   res: TableInfo_Res | undefined;
   room: Room | undefined;
   randSeed: number;
+  /** 结算本局时用的 */
+  playerItems: { [key: number]: OnItemChange };
 }
 
 /** 桌子上的玩家 */
@@ -175,6 +182,18 @@ export interface TableInfo_PlayersEntry {
 export interface TableInfo_LoseTeamsEntry {
   key: number;
   value: number;
+}
+
+export interface TableInfo_PlayerItemsEntry {
+  key: number;
+  value: OnItemChange | undefined;
+}
+
+/** 道具变化 */
+export interface OnItemChange {
+  itemList: Item[];
+  reason: string;
+  To: number;
 }
 
 function createBasePing(): Ping {
@@ -275,8 +294,54 @@ export const LoginToGame = {
   },
 };
 
+function createBaseItem(): Item {
+  return { key: 0, val: 0 };
+}
+
+export const Item = {
+  encode(message: Item, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.key !== 0) {
+      writer.uint32(8).int32(message.key);
+    }
+    if (message.val !== 0) {
+      writer.uint32(16).int32(message.val);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): Item {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseItem();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.key = reader.int32() as any;
+          continue;
+        case 2:
+          if (tag !== 16) {
+            break;
+          }
+
+          message.val = reader.int32();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
 function createBaseProfile(): Profile {
-  return { name: "", coin: 0, userId: 0, updatedAt: 0 };
+  return { name: "", userId: 0, itemList: [], updatedAt: 0 };
 }
 
 export const Profile = {
@@ -284,11 +349,11 @@ export const Profile = {
     if (message.name !== "") {
       writer.uint32(10).string(message.name);
     }
-    if (message.coin !== 0) {
-      writer.uint32(16).int32(message.coin);
-    }
     if (message.userId !== 0) {
-      writer.uint32(24).int64(message.userId);
+      writer.uint32(16).int64(message.userId);
+    }
+    for (const v of message.itemList) {
+      Item.encode(v!, writer.uint32(26).fork()).ldelim();
     }
     if (message.updatedAt !== 0) {
       writer.uint32(80).int64(message.updatedAt);
@@ -315,14 +380,14 @@ export const Profile = {
             break;
           }
 
-          message.coin = reader.int32();
+          message.userId = longToNumber(reader.int64() as Long);
           continue;
         case 3:
-          if (tag !== 24) {
+          if (tag !== 26) {
             break;
           }
 
-          message.userId = longToNumber(reader.int64() as Long);
+          message.itemList.push(Item.decode(reader, reader.uint32()));
           continue;
         case 10:
           if (tag !== 80) {
@@ -1285,6 +1350,7 @@ function createBaseTableInfo(): TableInfo {
     res: undefined,
     room: undefined,
     randSeed: 0,
+    playerItems: {},
   };
 }
 
@@ -1314,6 +1380,9 @@ export const TableInfo = {
     if (message.randSeed !== 0) {
       writer.uint32(64).int64(message.randSeed);
     }
+    Object.entries(message.playerItems).forEach(([key, value]) => {
+      TableInfo_PlayerItemsEntry.encode({ key: key as any, value }, writer.uint32(74).fork()).ldelim();
+    });
     return writer;
   },
 
@@ -1385,6 +1454,16 @@ export const TableInfo = {
           }
 
           message.randSeed = longToNumber(reader.int64() as Long);
+          continue;
+        case 9:
+          if (tag !== 74) {
+            break;
+          }
+
+          const entry9 = TableInfo_PlayerItemsEntry.decode(reader, reader.uint32());
+          if (entry9.value !== undefined) {
+            message.playerItems[entry9.key] = entry9.value;
+          }
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -1733,6 +1812,108 @@ export const TableInfo_LoseTeamsEntry = {
           }
 
           message.value = longToNumber(reader.int64() as Long);
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseTableInfo_PlayerItemsEntry(): TableInfo_PlayerItemsEntry {
+  return { key: 0, value: undefined };
+}
+
+export const TableInfo_PlayerItemsEntry = {
+  encode(message: TableInfo_PlayerItemsEntry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.key !== 0) {
+      writer.uint32(8).int64(message.key);
+    }
+    if (message.value !== undefined) {
+      OnItemChange.encode(message.value, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): TableInfo_PlayerItemsEntry {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTableInfo_PlayerItemsEntry();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.key = longToNumber(reader.int64() as Long);
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.value = OnItemChange.decode(reader, reader.uint32());
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseOnItemChange(): OnItemChange {
+  return { itemList: [], reason: "", To: 0 };
+}
+
+export const OnItemChange = {
+  encode(message: OnItemChange, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.itemList) {
+      Item.encode(v!, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.reason !== "") {
+      writer.uint32(18).string(message.reason);
+    }
+    if (message.To !== 0) {
+      writer.uint32(24).int64(message.To);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): OnItemChange {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOnItemChange();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.itemList.push(Item.decode(reader, reader.uint32()));
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.reason = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
+            break;
+          }
+
+          message.To = longToNumber(reader.int64() as Long);
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {

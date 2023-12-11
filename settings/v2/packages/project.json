@@ -17,5 +17,15 @@
       "width": 720,
       "height": 1280
     }
+  },
+  "sorting-layer": {
+    "layers": [
+      {
+        "id": 0,
+        "name": "default",
+        "value": 0
+      }
+    ],
+    "increaseId": 2
   }
 }

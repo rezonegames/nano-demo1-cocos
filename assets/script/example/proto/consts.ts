@@ -61,3 +61,8 @@ export enum ActionType {
   END = 100,
   UNRECOGNIZED = -1,
 }
+
+export enum ItemType {
+  COIN = 0,
+  UNRECOGNIZED = -1,
+}

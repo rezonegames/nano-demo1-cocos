@@ -564,6 +564,12 @@
     "quickClose": false,
     "cache": false,
     "showType": 1,
+    "myName": {
+      "__id__": 6
+    },
+    "myCoin": {
+      "__id__": 12
+    },
     "_id": ""
   },
   {

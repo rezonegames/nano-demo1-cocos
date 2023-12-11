@@ -30,7 +30,7 @@ export default class UIRegister extends UIView {
         let rspObject: CallbackObject = {
             target: null,
             callback: (cmd: number, data: any) => {
-                let resp = LoginToGameResp.decode(data);
+                let resp = LoginToGameResp.decode(new Uint8Array(data));
                 oo.log.logNet(resp, "注册游戏账号");
                 if (resp.code == ErrorCode.OK) {
                     uiManager.replace(UIID.UIHall, resp.roomList);

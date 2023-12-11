@@ -41,7 +41,6 @@ export default class UIExample extends Component {
 
     start() {
         uiManager.initUIConf(UICF);
-        uiManager.open(UIID.UIHeader);
         uiManager.open(UIID.UILogin);
     }
 }

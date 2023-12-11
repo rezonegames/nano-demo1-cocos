@@ -175,6 +175,7 @@ class NetNodeGame extends NetNode {
                     if (this.isReconnecting) {
                         this.isReconnecting = false;
                     }
+                    EventMgr.raiseEvent("onUserInfo", resp.profile);
                     // 如果tableId不为空，resumeTable，进入游戏
                     if (resp.tableId != "") {
                         this.resumeTable();
