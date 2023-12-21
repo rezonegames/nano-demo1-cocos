@@ -1,5 +1,5 @@
 import { UIID } from "../UIExample";
-import { Sprite, _decorator, Label, Node } from "cc";
+import { Sprite, _decorator, Label, Node, Layout } from "cc";
 import { SpriteFrame } from "cc";
 import {UIView} from "db://assets/Script/core/ui/UIView";
 import {GameStateResp, Join, Room} from "db://assets/Script/example/proto/client";
@@ -24,7 +24,10 @@ export default class UIHall extends UIView {
         this.listView.setDelegate({
             items: () => roomList,
             reuse: (itemNode: Node, item: Room) => {
-                itemNode.getChildByName("name").getComponent(Label).string = `房间：${item.name}`;
+                let layout = itemNode.getChildByName("Layout");
+                layout.getChildByName("name").getComponent(Label).string = `房间：${item.roomId}`;
+                layout.getChildByName("desc").getComponent(Label).string = `信息：${item.name}`;
+                layout.getChildByName("count").getComponent(Label).string = `人数：1000`;
                 itemNode.getChildByName("quickstart").on("click", () => {
                     // r.quickstart
                     let buf = Join.encode({roomId: item.roomId}).finish()

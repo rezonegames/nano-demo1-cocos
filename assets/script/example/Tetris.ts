@@ -46,14 +46,13 @@ export class Tetris extends Component {
     nextMatrix: Array<number>[]
 
     // tetris属性
-    config: { w: number, h: number, bw: number, bh: number } = {
+    config: { w: number, h: number, bw: number, bh: number, draw0: boolean } = {
         w: 12,
         h: 20,
         bw: 28,
         bh: 28,
+        draw0: false,
     };
-
-    draw0: boolean = true; // 当多人一起pk时，节省资源，不画0
 
     updateScore(score: number) {
         this.score.string = `分数：${score}`;
@@ -61,6 +60,7 @@ export class Tetris extends Component {
 
     onAdded(args: any) {
         // 创建
+        this.config.draw0 = args.draw0;
         this.arena = new Arena(this.config.w, this.config.h);
         this.player = new Player(this.arena, args.uid, args.teamId);
     }
@@ -85,7 +85,7 @@ export class Tetris extends Component {
             [0, 5, 0, 0],
             [0, 5, 0, 0],
         ];
-        const [w1, h1, bw1, bh1] = [this.config.bw/2*4+4,this.config.bh/2*4+4,this.config.bw/2,this.config.bh/2]
+        const [w1, h1, bw1, bh1] = [this.config.bw / 2 * 4 + 4, this.config.bh / 2 * 4 + 4, this.config.bw / 2, this.config.bh / 2]
         this.nextMatrix.forEach((row, y) => {
             this.nextArray[y] = []
             row.forEach((value, x) => {
@@ -103,7 +103,9 @@ export class Tetris extends Component {
     draw() {
         this.fillNull(this.arena.matrix);
         this.drawMatrix(this.arena.matrix, {x: 0, y: 0});
-        this.drawShadowMatrix();
+        if (this.config.draw0) {
+            this.drawShadowMatrix();
+        }
         this.drawMatrix(this.player.matrix, this.player.pos);
     }
 

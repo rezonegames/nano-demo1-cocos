@@ -16,7 +16,6 @@ import {ErrorCode} from "db://assets/Script/example/proto/error";
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
 import {channel} from "db://assets/Script/example/Channel";
 import {GameState, TableState} from "db://assets/Script/example/proto/consts";
-import {EventMgr} from "db://assets/Script/core/common/EventManager";
 
 // Learn TypeScript:
 //  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/typescript.html
@@ -53,7 +52,7 @@ export default class UIWaiting extends UIView {
 
 
     public onOpen(fromUI: number, ...args: any): void {
-        EventMgr.addEventListener("onState", this.onState, this);
+        oo.event.addEventListener("onState", this.onState, this);
         let room = args[0] as Room;
         this.title.string = `房间信息：名字：${room.name} 房间ID：${room.roomId}`;
         this.clear();
@@ -61,7 +60,7 @@ export default class UIWaiting extends UIView {
 
     onDestroy() {
         super.onDestroy();
-        EventMgr.removeEventListener("onState", this.onState, this);
+        oo.event.removeEventListener("onState", this.onState, this);
     }
 
     clear() {

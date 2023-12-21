@@ -4,6 +4,10 @@
     {
       "name": "default",
       "value": 1
+    },
+    {
+      "name": "header",
+      "value": 2
     }
   ],
   "fbx": {
@@ -14,8 +18,8 @@
   "general": {
     "designResolution": {
       "fitHeight": true,
-      "width": 720,
-      "height": 1280
+      "width": 1280,
+      "height": 720
     }
   },
   "sorting-layer": {
@@ -24,8 +28,13 @@
         "id": 0,
         "name": "default",
         "value": 0
+      },
+      {
+        "id": 3,
+        "name": "header",
+        "value": 1
       }
     ],
-    "increaseId": 2
+    "increaseId": 3
   }
 }

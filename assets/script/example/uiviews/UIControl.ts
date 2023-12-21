@@ -1,4 +1,4 @@
-import {_decorator, Button, instantiate, Label, Node, Prefab} from "cc";
+import {_decorator, Button, instantiate, Label, Node, Prefab, UITransform, Sprite} from "cc";
 import {UIView} from "db://assets/Script/core/ui/UIView";
 import {
     Action,
@@ -13,7 +13,6 @@ import {
 import {oo} from "db://assets/Script/core/oo";
 import {Tetris} from "db://assets/Script/example/Tetris";
 import {ActionType} from "db://assets/Script/example/proto/consts";
-import {EventMgr} from "db://assets/Script/core/common/EventManager";
 import {channel} from "db://assets/Script/example/Channel";
 
 const {ccclass, property} = _decorator;
@@ -42,55 +41,74 @@ export default class UIControl extends UIView {
     public onOpen(fromUI: number, ...args) {
         super.onOpen(fromUI, ...args);
         oo.log.logView(args, "UIControl.onOpen");
-        EventMgr.addEventListener("onFrame", this.onFrame, this);
+        oo.event.addEventListener("onFrame", this.onFrame, this);
         let tableInfo = args[0] as TableInfo;
         let room: Room = tableInfo.room;
         this.title.string = room.name
         oo.random.setSeed(tableInfo.randSeed);
-        // 初始化
-        switch (room.roomId) {
-            // 1v1
-            case "1":
-                oo.res.load("Prefab/Game1v1", Prefab, (err: Error | null, prefab: Prefab) => {
-                    if (err) {
-                        oo.log.logView(err, "加载失败");
-                        return;
+
+        oo.res.load([`Prefab/${room.prefab}`, "Prefab/Tetris"], Prefab, (err: Error | null, prefabs: Prefab[]) => {
+            if (err) {
+                oo.log.logView(err, "加载失败");
+                return;
+            }
+
+            let parent: Node = instantiate(prefabs[0]);
+            this.node.addChild(parent);
+
+            // 保存
+            let [i, j] = [1, 1];
+            let my = tableInfo.players[oo.storage.getUser()];
+            for (const [uid, player] of Object.entries(tableInfo.players)) {
+                let containerName = "";
+                if(player.teamId !== my.teamId) {
+                    containerName = `enemy${i}`;
+                    i++;
+                } else {
+                    if (parseInt(uid) == player.profile.userId) {
+                        containerName = "my";
+                    } else {
+                        containerName = `mate${j}`;
+                        j++;
                     }
+                }
+                let container: Node = parent.getChildByName(containerName);
+                let tNode: Node = instantiate(prefabs[1]);
+                let t: Tetris = tNode.getComponent("Tetris") as Tetris;
+                this.initTetris(player, t);
+                if (containerName == "my") {
+                    this.my = t;
+                } else {
+                    let s = container.getComponent(UITransform).width*1.0/500;
+                    tNode.setScale(s, s);
+                }
+                container.getComponent(Sprite).spriteFrame = null;
+                oo.log.logView(containerName, "containerName");
 
-                    let parent: Node = instantiate(prefab);
-                    this.node.addChild(parent);
-                    // 保存
-                    for (const [uid, player] of Object.entries(tableInfo.players)) {
-                        let name: string = parseInt(uid) == oo.storage.getUser() ? "my" : "enemy";
-                        let t: Tetris = parent.getChildByName(name).getComponent("Tetris") as Tetris;
-                        this.initTetris(player, t);
-                        if (name == "my") {
-                            this.my = t;
-                        }
-                        this.tetrisManager[uid] = t;
-                    }
+                container.addChild(tNode);
+                this.tetrisManager[uid] = t;
+            }
+            this.resProgress();
 
-                    oo.log.logView("", "res.ok");
-                    let buf = LoadRes.encode({current: 100}).finish();
-                    channel.gameNotify("r.loadres", buf);
+        });
 
-                });
-                break
-            case "2":
-                break;
-            default:
-                break
-        }
+
+    }
+
+    resProgress() {
+        oo.log.logView("", "res.ok");
+        let buf = LoadRes.encode({current: 100}).finish();
+        channel.gameNotify("r.loadres", buf);
     }
 
     onDestroy() {
         super.onDestroy();
-        EventMgr.removeEventListener("onFrame", this.onFrame, this);
+        oo.event.removeEventListener("onFrame", this.onFrame, this);
         oo.log.logView("UIControl.onDestroy");
     }
 
     initTetris(player: TableInfo_Player, tetris: Tetris) {
-        tetris.onAdded({uid: player.profile?.userId, draw0: false, teamId: player.teamId});
+        tetris.onAdded({uid: player.profile?.userId, draw0: player.profile?.userId === oo.storage.getUser(), teamId: player.teamId});
         // 玩家的所有事件
         ['nextPiece', 'pos', 'end', 'matrix', 'score', 'combo', 'combo_3', 'combo_4'].forEach(key => {
             let from = oo.storage.getUser() == tetris.player.uid ? 0 : tetris.player.uid;
@@ -255,7 +273,7 @@ export default class UIControl extends UIView {
     }
 
     onDrop(touchCounter: number, customEventData?: any) {
-        this.serialize(ActionType.DROP, this.touch(1, touchCounter, this.my.player.pos.y -1));
+        this.serialize(ActionType.DROP, this.touch(1, touchCounter, this.my.player.pos.y - 1));
     }
 
     onQuick() {

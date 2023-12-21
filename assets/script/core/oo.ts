@@ -4,6 +4,7 @@ import {RandomManager} from "./common/RandomManager";
 import {StorageManager} from "./common/StorageManager"
 import {NetManager} from "./network/NetManager"
 import ResLoader from "db://assets/Script/core/res/ResLoader";
+import {EventMgr} from "db://assets/Script/core/common/EventManager";
 
 export class oo {
     static log = Logger;
@@ -12,4 +13,5 @@ export class oo {
     static storage: StorageManager = new StorageManager();
     static tcp: NetManager = new NetManager();
     static res = new ResLoader();
+    static event = EventMgr
 }

@@ -39,7 +39,7 @@ class NetTips implements INetworkTips {
         let winSize = view.getCanvasSize();
         let scene = director.getScene();
         if (scene) {
-            let node = scene.getChildByName("@net_tip_label");
+            let node = scene.getChildByPath("Canvas/@net_tip_label");
             if (node) {
                 label = node.getComponent(Label);
             } else {
@@ -175,7 +175,7 @@ class NetNodeGame extends NetNode {
                     if (this.isReconnecting) {
                         this.isReconnecting = false;
                     }
-                    EventMgr.raiseEvent("onUserInfo", resp.profile);
+                    oo.event.raiseEvent("onUserInfo", resp.profile);
                     // 如果tableId不为空，resumeTable，进入游戏
                     if (resp.tableId != "") {
                         this.resumeTable();
@@ -335,6 +335,7 @@ export class NetChannelManager {
                             }
                             break
                         case TableState.GAMING:
+
                             break;
                         case TableState.SETTLEMENT:
                             uiManager.open(UIID.UISettlement, resp);
@@ -345,7 +346,7 @@ export class NetChannelManager {
                 case GameState.WAIT:
                     break;
             }
-            EventMgr.raiseEvent("onState", resp);
+            oo.event.raiseEvent("onState", resp);
         }, this);
 
         // 游戏内状态同步

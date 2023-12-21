@@ -1025,8 +1025,8 @@
     },
     "_alignFlags": 45,
     "_target": null,
-    "_left": 20,
-    "_right": 20,
+    "_left": 200,
+    "_right": 200,
     "_top": 200,
     "_bottom": 200,
     "_horizontalCenter": 0,
@@ -1078,8 +1078,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 680,
-      "height": 880
+      "width": 880,
+      "height": 320
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",

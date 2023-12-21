@@ -2,12 +2,12 @@
   "ver": "1.1.43",
   "importer": "prefab",
   "imported": true,
-  "uuid": "88f35af1-b83e-4286-a57b-10705df0f7a2",
+  "uuid": "eb0f4751-e0d8-42d7-a396-a3a449ff6cdd",
   "files": [
     ".json"
   ],
   "subMetas": {},
   "userData": {
-    "syncNodeName": "Game1v1"
+    "syncNodeName": "Game2v3"
   }
 }

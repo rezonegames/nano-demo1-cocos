@@ -72,7 +72,7 @@ export class Arena {
     push(valList: Array<number>) {
         let row: Array<number> = []
         for (let i = 0; i < this.matrix[0].length; i++) {
-            let v = valList.indexOf(i) !== -1 ? 0 : 1;
+            let v = valList.indexOf(i) !== -1 ? 0 : 2;
             row.push(v);
         }
         this.matrix.push(row);

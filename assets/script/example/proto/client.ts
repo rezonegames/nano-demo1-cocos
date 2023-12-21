@@ -47,6 +47,7 @@ export interface Room {
   pvp: number;
   name: string;
   minCoin: number;
+  prefab: string;
 }
 
 export interface GetRoomListResp {
@@ -529,7 +530,7 @@ export const RegisterGameReq = {
 };
 
 function createBaseRoom(): Room {
-  return { roomId: "", pvp: 0, name: "", minCoin: 0 };
+  return { roomId: "", pvp: 0, name: "", minCoin: 0, prefab: "" };
 }
 
 export const Room = {
@@ -545,6 +546,9 @@ export const Room = {
     }
     if (message.minCoin !== 0) {
       writer.uint32(32).int32(message.minCoin);
+    }
+    if (message.prefab !== "") {
+      writer.uint32(42).string(message.prefab);
     }
     return writer;
   },
@@ -583,6 +587,13 @@ export const Room = {
           }
 
           message.minCoin = reader.int32();
+          continue;
+        case 5:
+          if (tag !== 42) {
+            break;
+          }
+
+          message.prefab = reader.string();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {

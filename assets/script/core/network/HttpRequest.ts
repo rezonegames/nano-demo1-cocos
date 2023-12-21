@@ -39,6 +39,7 @@ export class HttpRequest {
         // 回调
         xhr.timeout = timeout;
         xhr.ontimeout = () => {
+            console.log(`${url} timeout`);
             this.deleteCache(url);
             data.event = HttpEvent.TIMEOUT; // 超时
             if (errorCallback) errorCallback(data);
@@ -54,6 +55,7 @@ export class HttpRequest {
         }
 
         xhr.onerror = () => {
+            console.log(`${url} onerror readyState:${xhr.readyState} status:${xhr.status} ${xhr.response}`);
             this.deleteCache(url);
             if (errorCallback == null) return;
             if (xhr.readyState == 0 || xhr.readyState == 1 || xhr.status == 0) {
@@ -62,9 +64,10 @@ export class HttpRequest {
                 data.event = HttpEvent.UNKNOWN_ERROR;       // 未知错误
             }
             if (errorCallback) errorCallback(data);
-        };
+        }
 
         xhr.onreadystatechange = () => {
+            console.log(`${url} onreadystatechange readyState:${xhr.readyState} status:${xhr.status} ${xhr.response}`);
             this.deleteCache(url);
             if (xhr.readyState != 4) return;
             if (xhr.status == 200) {
@@ -73,7 +76,7 @@ export class HttpRequest {
                     completeCallback(responseBuffer);
                 }
             }
-        };
+        }
     }
 
     /**
